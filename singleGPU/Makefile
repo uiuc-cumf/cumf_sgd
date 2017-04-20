@@ -1,7 +1,7 @@
 
 
 
-CU_FLAG=  -gencode arch=compute_35,code=compute_35 \
+CU_FLAG= -D_FORCE_INLINES  -gencode arch=compute_35,code=compute_35 \
 	      -gencode arch=compute_37,code=compute_37 \
           -gencode arch=compute_50,code=compute_50
 
