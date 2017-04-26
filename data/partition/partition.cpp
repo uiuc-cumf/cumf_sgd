@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 	else
 	{
 		printf("usage:./partition file_name");
-		exit(0);
+		return 0;
 	}
 
 
