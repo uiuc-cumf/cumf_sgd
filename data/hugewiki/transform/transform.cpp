@@ -24,12 +24,10 @@ int main(int argc, char**argv)
 	//transform
 	FILE* file_out = fopen((file_name + ".bin").c_str(), "wb");
 
-
 	char line[256];
 
 	//abandon the file headers
-	//fscanf(file_in, "%[^\n]\n", line);
-	//fscanf(file_in, "%[^\n]\n", line);
+	fscanf(file_in, "%[^\n]\n", line);
 	
 	int u,v;
 	float r;

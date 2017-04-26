@@ -3,3 +3,6 @@
 .*
 *.o
 cumf_sgd
+sample
+transform
+partition

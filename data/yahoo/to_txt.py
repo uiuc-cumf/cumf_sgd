@@ -53,7 +53,6 @@ print "max_item: %d"%max_item
 print "max_rate: %d"%max_rate
 
 
-
 f_read.close()
 f_write.close()
 
