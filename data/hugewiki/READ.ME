@@ -1,0 +1,28 @@
+
+
+# Step 1: Compile first
+$ cd sample
+$ make
+$ cd ..
+
+$ cd transform
+$ make
+$ cd ..
+
+# Step 2: Download hugewiki.gz and decompress it. Name the output file as "hugewiki.txt"
+
+
+# Step 3: transform hugewiki.txt -> hugewiki.bin
+$ ./transform/transform /path-to/hugewiki.txt hugewiki.bin
+	
+
+# Step 4: sampling, 89% as training set, 1% as test set. The left 10% is discarded to make sure the data size is close to the data set appeared in previous work.
+$ ./sample/sample /path-to/hugewiki.bin
+output: hugewiki.bin.train & hugewiki.bin.test
+
+
+# Step 5: partition the data into 16 parts
+$ ../partition/partition hugewiki.bin.train
+
+# Don't have to parititon hugewiki.bin.test, it's small enough.
+
