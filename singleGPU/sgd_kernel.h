@@ -13,8 +13,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
    }
 }
 
-
 void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob, float scale);
-
 
 #endif

@@ -1,0 +1,27 @@
+1. why scaling? scaling is used to make sure every rating is around 1
+2. why para.lambda_p = para.lambda_p / scale; and para.lambda_q = para.lambda_q / scale;
+3. int update_vector_size = 128;
+4. sgd_k128_kernel_hogwild_warp32_lrate<<<para.num_workers / 4, 128>>>
+5. ux vy
+6. In comparison, Ya- hoo!Music can be solved on multiple GPUs as the dimension of it R is 1M ×625k. We divide its R into 8×8 blocks and run it with two Pascal GPUs. Figure 16 shows the conver- gence speed. With 2 Pascal GPUs, cuMF SGD takes 2.5s to converge to RMSE 22, which is 1.5X as fast as 1 Pascal GPU (3.8s).
+
+hugewiki: http://www.select.cs.cmu.edu/code/graphlab/datasets/hugewiki.gz
+yahoomusic: 链接: https://pan.baidu.com/s/1c2KPxzM 密码: piha
+
+parallel worker = thread block handles 4 random samples in the inner most loop
+blockDim = 128 is 15% faster than blockDim = 32
+focus on faster convergence
+uv partition: fit into gpu memory
+xy partition: double buffering, overlap data transfer with computation, especially useful when data cannot fit into gpu memory
+multi-threaded read in problem: name .bin into .bin0 .bin1 ...
+No convergence check to not have overhead
+Nomad: intentionally decrease the performance on single cpu to show scalibility
+When to use multiple gpus: 1 billion samples, both dimension > 100k (required by matrix blocking)
+larger dataset: search snap.stanford
+
+if m is small and n is large, both libmf and cumf_sgd do not converge
+
+Related Work
+https://github.com/ariyam/submissionALS 2017
+CNTK which uses Microsoft’s special parallelization algorithms of 1-bit quantization (efficient) and block momentum (very efficient)
+http://timdettmers.com/2017/04/09/which-gpu-for-deep-learning/#comments

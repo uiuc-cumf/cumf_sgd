@@ -189,7 +189,8 @@ mf_problem read_problem(string path) {
       file_names.push_back(tmp_name);
   }
   num_files = file_names.size();
-
+  printf("num_files = %d\n", num_files);
+  
   if (num_files <= 0) {
     if (path.empty()) {
       printf("file %s open failed\n", path.c_str());

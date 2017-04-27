@@ -143,6 +143,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
   fflush(stdout);
 
   // malloc a problem grid on GPU
+  // xy != 1 use double buffering to overlap computation and data transfer
   if (prob->x_grid * prob->y_grid == 1) {
     cudaMalloc(&(prob->gpuR), sizeof(mf_node) * prob->maxGridSize);
     prob->cur_u_id = -1;
@@ -176,7 +177,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
   }
 
   // set update count
-  int update_vector_size = 128;
+  int update_vector_size = 128; // to explore cache, parameter f in the paper
   int *update_count_per_block = new int[prob->ux * prob->vy]();
   int max_update_count_per_block = -1;
   for (int cur_grid_id = 0; cur_grid_id < prob->ux * prob->vy; cur_grid_id++) {
@@ -190,7 +191,9 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
   double *gpu_iter_err = NULL;
 
   // run the update kernel
-  if (prob->u_grid * prob->v_grid == 1) {
+  if (prob->u_grid * prob->v_grid == 1) { 
+    // dataset fits in memory, no need to do data parition, 1 grid
+
     cudaMemcpy(prob->gpuR, prob->R2D[0], sizeof(mf_node) * prob->gridSize[0],
                cudaMemcpyHostToDevice);
     cudaMemcpy(model->gpuHalfp, model->halfp,
@@ -217,6 +220,8 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     cudaMemcpy(model->halfq, model->gpuHalfq,
                sizeof(half) * model->v_seg * model->k, cudaMemcpyDeviceToHost);
   } else if (prob->x_grid * prob->y_grid == 1) {
+    // dataset does not fit in memory, needs data parition uv, no double buffering
+    // 50% 
     clock_t start = clock();
 
     // random shuffle
@@ -330,6 +335,9 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
       gpuErr(cudaPeekAtLastError());
     }
   } else {
+    // dataset does not fit in memory, needs data parition uv, xy, use double buffering
+    // each time schedule xy blocks into a stream
+
     clock_t start = clock();
 
     // scheduling info
