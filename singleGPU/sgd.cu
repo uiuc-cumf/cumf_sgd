@@ -24,6 +24,8 @@
 #include <omp.h>
 #endif
 
+
+
 #include "sgd.h"
 #include "sgd_kernel.h"
 #include <iomanip>
@@ -223,7 +225,6 @@ mf_problem read_problem(string path) {
       flag += fread(&r, sizeof(float), 1, fptr);
       if (flag != 3)
         break;
-
       if (u + 1 > prob.m)
         prob.m = u + 1;
       if (v + 1 > prob.n)
@@ -270,6 +271,7 @@ mf_problem read_problem(string path) {
     cudaMallocHost(&R, sizeof(mf_node) * prob.nnz);
     prob.R = R;
 
+     printf("Threaded File Read\n");
     // launch
     for (int i = 0; i < num_files; i++) {
       pthread_arg_list[i].thread_id = i;

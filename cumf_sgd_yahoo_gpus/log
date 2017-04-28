@@ -1,0 +1,491 @@
+-----calling arg parse-------
+k         :128
+num_blocks:768
+u_grid    :8
+v_grid    :8
+x_grid    :1
+y_grid    :1
+ux        :8
+vy        :8
+num_iters :1
+gpu       :6
+lambda_p  :1.00000
+lambda_q  :1.00000
+lrate     :0.00000
+alpha     :0.1100
+beta      :0.2000
+tr_path   :/userdata/xiaolong/yahoo/yahoo.train.bin
+va_path   :
+model_path:yahoo.train.bin.model
+-----arg parse finished------
+
+
+==38999== NVPROF is profiling process 38999, command: ../sgd_gpu -g 6 -l 1 -a 0.11 -b 0.2 -u 8 -v 8 -x 1 -y 1 -s 768 -k 128 -t 1 /userdata/xiaolong/yahoo/yahoo.train.bin
+-----read_problem called-----
+num_files:16
+read_problem:/userdata/xiaolong/yahoo/yahoo.train.bin
+m:1000990, n:624961, nnz:252800275
+time elapsed:3.46933231s
+-----read problem finished-----
+
+
+sqrt(ex2):62.014747
+ave     :49.181
+std_dev :37.777
+scale   :37.777
+
+
+-----shuffle problem-----
+time elapsed:1.20412000s
+-----shuffle finished-----
+
+
+-----grid problem-----
+u_seg:125124
+v_seg:78121
+grid count time:4.70799000s
+max grid size:4233040
+swapping ...
+grid swap time:11.23747500s
+
+
+-----scale problem----
+lambda:0.02647123, 0.02647123
+time elapsed:0.94290700s
+-----scale finished-----
+
+
+-----init model----
+state_size:125184
+grid:0
+grid:1
+grid:2
+grid:3
+grid:4
+grid:5
+grid:6
+grid:7
+state_size:78336
+grid:0
+grid:1
+grid:2
+grid:3
+grid:4
+grid:5
+grid:6
+grid:7
+time elapsed:0.67363900s
+-----init model-----
+
+
+calling sgd_update_k128() ...
+alpha:0.1100
+beta :0.2000
+lrate:0.0000
+i:   0, rate:0.11000000
+i:   1, rate:0.09166667
+i:   2, rate:0.07025677
+i:   3, rate:0.05394192
+i:   4, rate:0.04230769
+==38999== Profiling application: ../sgd_gpu -g 6 -l 1 -a 0.11 -b 0.2 -u 8 -v 8 -x 1 -y 1 -s 768 -k 128 -t 1 /userdata/xiaolong/yahoo/yahoo.train.bin
+update_vector_size        : 128
+max_update_count_per_block: 44
+finished
+transform_feature_vector ...
+    grid:0
+    grid:1
+    grid:2
+    grid:3
+    grid:4
+    grid:5
+    grid:6
+    grid:7
+transform_feature_vector ...
+    grid:0
+    grid:1
+    grid:2
+    grid:3
+    grid:4
+    grid:5
+    grid:6
+    grid:7
+-----scale model----
+model->m*model->k：128126720
+time elapsed:0.12473700s
+-----scale model-----
+
+
+save_model() is called
+saving feature m(1000990)...
+progress: %0.000
+saving feature n(624961)...
+progress: %0.000
+time elapsed:0.71225600s
+
+training application finished...
+
+
+==38999== Profiling result:
+   Start  Duration            Grid Size      Block Size     Regs*    SSMem*    DSMem*      Size  Throughput           Device   Context    Stream  Name
+27.0919s  21.415ms            (489 1 1)       (256 1 1)        31        0B        0B         -           -  GeForce GTX TIT         1         7  init_rand_state(curandStateXORWOW*) [711]
+27.1133s  6.2353ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [719]
+27.1196s  5.4293ms                    -               -         -         -         -  30.548MB  5.4946GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1250s  6.2253ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [728]
+27.1313s  5.3806ms                    -               -         -         -         -  30.548MB  5.5444GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1367s  6.2255ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [737]
+27.1429s  5.4535ms                    -               -         -         -         -  30.548MB  5.4702GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1484s  6.2361ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [746]
+27.1547s  4.8924ms                    -               -         -         -         -  30.548MB  6.0977GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1596s  6.2298ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [755]
+27.1658s  4.8855ms                    -               -         -         -         -  30.548MB  6.1062GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1707s  6.5407ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [764]
+27.1773s  4.8827ms                    -               -         -         -         -  30.548MB  6.1097GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1822s  6.2015ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [773]
+27.1884s  4.8825ms                    -               -         -         -         -  30.548MB  6.1099GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.1933s  6.1958ms          (62562 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [782]
+27.1995s  4.8825ms                    -               -         -         -         -  30.548MB  6.1099GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2065s  12.184ms            (306 1 1)       (256 1 1)        31        0B        0B         -           -  GeForce GTX TIT         1         7  init_rand_state(curandStateXORWOW*) [790]
+27.2187s  3.6432ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [798]
+27.2224s  3.0505ms                    -               -         -         -         -  19.073MB  6.1057GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2254s  3.6552ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [807]
+27.2291s  3.0420ms                    -               -         -         -         -  19.073MB  6.1228GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2322s  3.6445ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [816]
+27.2358s  3.0534ms                    -               -         -         -         -  19.073MB  6.1000GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2389s  3.6478ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [825]
+27.2426s  3.0425ms                    -               -         -         -         -  19.073MB  6.1219GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2456s  3.6462ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [834]
+27.2493s  3.0458ms                    -               -         -         -         -  19.073MB  6.1152GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2528s  3.6543ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [843]
+27.2565s  3.0418ms                    -               -         -         -         -  19.073MB  6.1231GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2595s  3.6516ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [852]
+27.2632s  3.0473ms                    -               -         -         -         -  19.073MB  6.1122GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2663s  3.6503ms          (39061 1 1)       (256 1 1)        18        0B        0B         -           -  GeForce GTX TIT         1         7  random_init(curandStateXORWOW*, int, __half*, __int64, __int64, float) [861]
+27.2699s  3.0428ms                    -               -         -         -         -  19.073MB  6.1212GB/s  GeForce GTX TIT         1         7  [CUDA memcpy DtoH]
+27.2770s  942.42us              (3 1 1)       (256 1 1)        31        0B        0B         -           -  GeForce GTX TIT         1         7  init_rand_state(curandStateXORWOW*, int) [870]
+27.2781s  2.3360us                    -               -         -         -         -  4.0000KB  1.6330GB/s  GeForce GTX TIT         1         7  [CUDA memcpy HtoD]
+27.9045s  8.3259ms                    -               -         -         -         -  43.911MB  5.1503GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9131s  9.0456ms                    -               -         -         -         -  48.233MB  5.2072GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9225s  8.7482ms                    -               -         -         -         -  45.249MB  5.0512GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9315s  8.2707ms                    -               -         -         -         -  45.417MB  5.3626GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9410s  8.2648ms                    -               -         -         -         -  48.443MB  5.7240GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9500s  7.4303ms                    -               -         -         -         -  43.531MB  5.7212GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9581s  7.7700ms                    -               -         -         -         -  45.461MB  5.7137GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9664s  8.0532ms                    -               -         -         -         -  47.055MB  5.7061GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9756s  7.3765ms                    -               -         -         -         -  43.213MB  5.7209GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9836s  8.1166ms                    -               -         -         -         -  47.502MB  5.7153GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+27.9932s  7.6205ms                    -               -         -         -         -  44.595MB  5.7148GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0017s  7.6444ms                    -               -         -         -         -  44.740MB  5.7154GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0118s  8.1593ms                    -               -         -         -         -  47.789MB  5.7197GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0207s  7.3267ms                    -               -         -         -         -  42.812MB  5.7063GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0312s  7.6500ms                    -               -         -         -         -  44.775MB  5.7158GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0393s  8.4673ms                    -               -         -         -         -  46.374MB  5.3485GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0482s  8.1580ms                    -               -         -         -         -  43.048MB  5.1531GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0567s  8.8901ms                    -               -         -         -         -  47.333MB  5.1995GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0660s  8.6180ms                    -               -         -         -         -  44.436MB  5.0354GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0751s  8.2251ms                    -               -         -         -         -  44.514MB  5.2851GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0845s  8.1258ms                    -               -         -         -         -  47.626MB  5.7237GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.0933s  7.2368ms                    -               -         -         -         -  42.622MB  5.7516GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1012s  7.6384ms                    -               -         -         -         -  44.643MB  5.7076GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1096s  7.8945ms                    -               -         -         -         -  46.190MB  5.7138GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1182s  7.3311ms                    -               -         -         -         -  42.947MB  5.7210GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1262s  8.0757ms                    -               -         -         -         -  47.246MB  5.7132GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1349s  7.4969ms                    -               -         -         -         -  44.338MB  5.7756GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1429s  7.6031ms                    -               -         -         -         -  44.440MB  5.7080GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1512s  8.1212ms                    -               -         -         -         -  47.527MB  5.7151GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1601s  7.2653ms                    -               -         -         -         -  42.587MB  5.7243GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1680s  7.6196ms                    -               -         -         -         -  44.537MB  5.7081GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1785s  7.8693ms                    -               -         -         -         -  46.107MB  5.7217GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1867s  8.1269ms                    -               -         -         -         -  42.814MB  5.1447GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.1952s  8.8782ms                    -               -         -         -         -  47.073MB  5.1778GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2044s  8.3168ms                    -               -         -         -         -  44.191MB  5.1889GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2131s  8.5168ms                    -               -         -         -         -  44.292MB  5.0786GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2219s  8.7088ms                    -               -         -         -         -  47.368MB  5.3116GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2314s  7.2447ms                    -               -         -         -         -  42.432MB  5.7197GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2394s  7.5769ms                    -               -         -         -         -  44.400MB  5.7226GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2482s  7.8583ms                    -               -         -         -         -  45.949MB  5.7101GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2567s  7.3990ms                    -               -         -         -         -  43.297MB  5.7146GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2647s  8.1420ms                    -               -         -         -         -  47.587MB  5.7077GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2734s  7.6440ms                    -               -         -         -         -  44.722MB  5.7135GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2816s  7.6682ms                    -               -         -         -         -  44.814MB  5.7072GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2900s  8.1697ms                    -               -         -         -         -  47.876MB  5.7228GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.2989s  7.3391ms                    -               -         -         -         -  42.966MB  5.7172GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3068s  7.6673ms                    -               -         -         -         -  44.902MB  5.7190GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3152s  7.9340ms                    -               -         -         -         -  46.501MB  5.7236GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3237s  7.4007ms                    -               -         -         -         -  43.360MB  5.7216GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3318s  8.1216ms                    -               -         -         -         -  47.641MB  5.7285GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3404s  7.6409ms                    -               -         -         -         -  44.825MB  5.7290GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3484s  7.6566ms                    -               -         -         -         -  44.833MB  5.7183GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3565s  8.1743ms                    -               -         -         -         -  47.964MB  5.7301GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3650s  7.3230ms                    -               -         -         -         -  42.952MB  5.7278GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3727s  7.6683ms                    -               -         -         -         -  44.945MB  5.7237GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3810s  7.9510ms                    -               -         -         -         -  46.540MB  5.7162GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3896s  7.3299ms                    -               -         -         -         -  42.946MB  5.7218GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.3977s  8.0727ms                    -               -         -         -         -  47.230MB  5.7135GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.4064s  7.5708ms                    -               -         -         -         -  44.302MB  5.7145GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.4146s  7.5489ms                    -               -         -         -         -  44.406MB  5.7446GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.4227s  8.1138ms                    -               -         -         -         -  47.493MB  5.7162GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.4315s  7.2873ms                    -               -         -         -         -  42.585MB  5.7068GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.4394s  7.5994ms                    -               -         -         -         -  44.541MB  5.7238GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+28.4478s  7.8659ms                    -               -         -         -         -  46.087MB  5.7218GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+29.0937s  8.3173ms                    -               -         -         -         -  43.911MB  5.1557GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1024s  9.1501ms                    -               -         -         -         -  48.233MB  5.1478GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1119s  8.7192ms                    -               -         -         -         -  45.249MB  5.0680GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1209s  8.4024ms                    -               -         -         -         -  45.417MB  5.2786GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1298s  8.2669ms                    -               -         -         -         -  48.443MB  5.7226GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1388s  7.4303ms                    -               -         -         -         -  43.531MB  5.7212GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1468s  7.7613ms                    -               -         -         -         -  45.461MB  5.7201GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1552s  8.0430ms                    -               -         -         -         -  47.055MB  5.7133GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1639s  7.3763ms                    -               -         -         -         -  43.213MB  5.7210GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1717s  8.1189ms                    -               -         -         -         -  47.502MB  5.7136GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1834s  7.6104ms                    -               -         -         -         -  44.595MB  5.7224GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1918s  7.6353ms                    -               -         -         -         -  44.740MB  5.7223GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.1998s  8.1617ms                    -               -         -         -         -  47.789MB  5.7180GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2087s  7.3137ms                    -               -         -         -         -  42.812MB  5.7165GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2169s  7.6584ms                    -               -         -         -         -  44.775MB  5.7096GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2255s  7.9141ms                    -               -         -         -         -  46.374MB  5.7223GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2341s  8.2077ms                    -               -         -         -         -  43.048MB  5.1219GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2429s  9.0543ms                    -               -         -         -         -  47.333MB  5.1052GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2534s  8.5209ms                    -               -         -         -         -  44.436MB  5.0927GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2625s  8.5867ms                    -               -         -         -         -  44.514MB  5.0625GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2717s  9.0686ms                    -               -         -         -         -  47.626MB  5.1286GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2815s  8.0601ms                    -               -         -         -         -  42.622MB  5.1641GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2903s  8.6959ms                    -               -         -         -         -  44.643MB  5.0135GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.2996s  8.1964ms                    -               -         -         -         -  46.190MB  5.5034GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3086s  7.3374ms                    -               -         -         -         -  42.947MB  5.7160GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3166s  8.0767ms                    -               -         -         -         -  47.246MB  5.7125GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3252s  7.5074ms                    -               -         -         -         -  44.338MB  5.7675GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3332s  7.5926ms                    -               -         -         -         -  44.440MB  5.7158GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3415s  8.1263ms                    -               -         -         -         -  47.527MB  5.7115GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3518s  7.2605ms                    -               -         -         -         -  42.587MB  5.7281GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3605s  7.6076ms                    -               -         -         -         -  44.537MB  5.7171GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3687s  7.8714ms                    -               -         -         -         -  46.107MB  5.7202GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3771s  7.3011ms                    -               -         -         -         -  42.814MB  5.7266GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3847s  8.0137ms                    -               -         -         -         -  47.073MB  5.7363GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.3931s  7.4918ms                    -               -         -         -         -  44.191MB  5.7603GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4012s  7.5552ms                    -               -         -         -         -  44.292MB  5.7250GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4091s  8.0691ms                    -               -         -         -         -  47.368MB  5.7327GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4175s  7.2334ms                    -               -         -         -         -  42.432MB  5.7286GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4250s  7.5677ms                    -               -         -         -         -  44.400MB  5.7295GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4329s  7.8230ms                    -               -         -         -         -  45.949MB  5.7359GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4410s  7.3810ms                    -               -         -         -         -  43.297MB  5.7285GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4487s  8.1117ms                    -               -         -         -         -  47.587MB  5.7290GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4571s  7.6147ms                    -               -         -         -         -  44.722MB  5.7355GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4650s  7.6303ms                    -               -         -         -         -  44.814MB  5.7355GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4729s  8.1499ms                    -               -         -         -         -  47.876MB  5.7367GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4814s  7.3178ms                    -               -         -         -         -  42.966MB  5.7339GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4892s  8.5017ms                    -               -         -         -         -  44.902MB  5.1577GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.4982s  8.8384ms                    -               -         -         -         -  46.501MB  5.1379GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5074s  8.3006ms                    -               -         -         -         -  43.360MB  5.1013GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5161s  9.1131ms                    -               -         -         -         -  47.641MB  5.1053GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5257s  8.5369ms                    -               -         -         -         -  44.825MB  5.1277GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5346s  8.5858ms                    -               -         -         -         -  44.833MB  5.0995GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5436s  9.1550ms                    -               -         -         -         -  47.964MB  5.1163GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5531s  8.1173ms                    -               -         -         -         -  42.952MB  5.1674GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5615s  8.7274ms                    -               -         -         -         -  44.945MB  5.0291GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5706s  8.9129ms                    -               -         -         -         -  46.540MB  5.0993GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5799s  8.3270ms                    -               -         -         -         -  42.946MB  5.0366GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5885s  9.1549ms                    -               -         -         -         -  47.230MB  5.0381GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.5980s  8.5013ms                    -               -         -         -         -  44.302MB  5.0890GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.6069s  8.5434ms                    -               -         -         -         -  44.406MB  5.0759GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.6157s  9.1663ms                    -               -         -         -         -  47.493MB  5.0598GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.6252s  8.0694ms                    -               -         -         -         -  42.585MB  5.1536GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.6341s  7.5835ms                    -               -         -         -         -  44.541MB  5.7357GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.6421s  7.8623ms                    -               -         -         -         -  46.087MB  5.7244GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+29.6549s  874.89us              (3 1 1)       (256 1 1)        31        0B        0B         -           -  GeForce GTX TIT         2        14  init_rand_state(curandStateXORWOW*, int) [1156]
+29.6563s  901.88us              (3 1 1)       (256 1 1)        31        0B        0B         -           -  GeForce GTX TIT         3        21  init_rand_state(curandStateXORWOW*, int) [1162]
+29.6566s  2.6560us                    -               -         -         -         -  4.0000KB  1.4363GB/s  GeForce GTX TIT         2        14  [CUDA memcpy HtoD]
+29.6572s  2.3360us                    -               -         -         -         -  4.0000KB  1.6330GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+
+
+
+
+
+29.6575s  5.1682ms                    -               -         -         -         -  30.548MB  5.7722GB/s  GeForce GTX TIT         2        29  [CUDA memcpy HtoD]
+29.6627s  3.2241ms                    -               -         -         -         -  19.073MB  5.7770GB/s  GeForce GTX TIT         2        29  [CUDA memcpy HtoD]
+29.6661s  12.936ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        27  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1198]
+29.6661s  3.2379ms                    -               -         -         -         -  19.073MB  5.7524GB/s  GeForce GTX TIT         2        29  [CUDA memcpy HtoD]
+29.6791s  13.874ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        27  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1223]
+29.6791s  3.9202ms                    -               -         -         -         -  19.073MB  4.7511GB/s  GeForce GTX TIT         2        29  [CUDA memcpy HtoD]
+29.6791s  3.9201ms                    -               -         -         -         -  19.073MB  4.7514GB/s  GeForce GTX TIT         2        28  [CUDA memcpy DtoH]
+29.6930s  13.404ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        27  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1249]
+29.6930s  3.9375ms                    -               -         -         -         -  19.073MB  4.7303GB/s  GeForce GTX TIT         2        29  [CUDA memcpy HtoD]
+29.6930s  3.9457ms                    -               -         -         -         -  19.073MB  4.7204GB/s  GeForce GTX TIT         2        28  [CUDA memcpy DtoH]
+29.7064s  13.248ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        27  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1275]
+29.7064s  3.0895ms                    -               -         -         -         -  19.073MB  6.0286GB/s  GeForce GTX TIT         2        28  [CUDA memcpy DtoH]
+29.7197s  3.1120ms                    -               -         -         -         -  19.073MB  5.9851GB/s  GeForce GTX TIT         2        28  [CUDA memcpy DtoH]
+29.7228s  4.9458ms                    -               -         -         -         -  30.548MB  6.0317GB/s  GeForce GTX TIT         2        28  [CUDA memcpy DtoH]
+
+
+
+29.7281s  5.1663ms                    -               -         -         -         -  30.548MB  5.7743GB/s  GeForce GTX TIT         2        32  [CUDA memcpy HtoD]
+29.7333s  3.2199ms                    -               -         -         -         -  19.073MB  5.7845GB/s  GeForce GTX TIT         2        32  [CUDA memcpy HtoD]
+29.7366s  13.866ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        30  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1310]
+29.7366s  3.2223ms                    -               -         -         -         -  19.073MB  5.7802GB/s  GeForce GTX TIT         2        32  [CUDA memcpy HtoD]
+29.7505s  12.636ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        30  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1335]
+29.7505s  4.1986ms                    -               -         -         -         -  19.073MB  4.4362GB/s  GeForce GTX TIT         2        32  [CUDA memcpy HtoD]
+29.7505s  4.2044ms                    -               -         -         -         -  19.073MB  4.4300GB/s  GeForce GTX TIT         2        31  [CUDA memcpy DtoH]
+29.7632s  13.186ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        30  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1361]
+29.7632s  4.1916ms                    -               -         -         -         -  19.073MB  4.4435GB/s  GeForce GTX TIT         2        32  [CUDA memcpy HtoD]
+29.7632s  4.1841ms                    -               -         -         -         -  19.073MB  4.4516GB/s  GeForce GTX TIT         2        31  [CUDA memcpy DtoH]
+29.7764s  13.584ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        30  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1387]
+29.7764s  3.1398ms                    -               -         -         -         -  19.073MB  5.9321GB/s  GeForce GTX TIT         2        31  [CUDA memcpy DtoH]
+29.7900s  3.1554ms                    -               -         -         -         -  19.073MB  5.9027GB/s  GeForce GTX TIT         2        31  [CUDA memcpy DtoH]
+29.7932s  4.9918ms                    -               -         -         -         -  30.548MB  5.9762GB/s  GeForce GTX TIT         2        31  [CUDA memcpy DtoH]
+
+
+
+29.7984s  5.1582ms                    -               -         -         -         -  30.548MB  5.7834GB/s  GeForce GTX TIT         2        35  [CUDA memcpy HtoD]
+29.8036s  3.2415ms                    -               -         -         -         -  19.073MB  5.7459GB/s  GeForce GTX TIT         2        35  [CUDA memcpy HtoD]
+29.8069s  12.631ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        33  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1422]
+29.8069s  3.2213ms                    -               -         -         -         -  19.073MB  5.7821GB/s  GeForce GTX TIT         2        35  [CUDA memcpy HtoD]
+29.8195s  13.881ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        33  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1447]
+29.8195s  4.0969ms                    -               -         -         -         -  19.073MB  4.5463GB/s  GeForce GTX TIT         2        35  [CUDA memcpy HtoD]
+29.8196s  4.0930ms                    -               -         -         -         -  19.073MB  4.5506GB/s  GeForce GTX TIT         2        34  [CUDA memcpy DtoH]
+29.8335s  12.935ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        33  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1473]
+29.8335s  4.1770ms                    -               -         -         -         -  19.073MB  4.4591GB/s  GeForce GTX TIT         2        35  [CUDA memcpy HtoD]
+29.8335s  4.1779ms                    -               -         -         -         -  19.073MB  4.4581GB/s  GeForce GTX TIT         2        34  [CUDA memcpy DtoH]
+29.8464s  13.101ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        33  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1499]
+29.8465s  3.1103ms                    -               -         -         -         -  19.073MB  5.9883GB/s  GeForce GTX TIT         2        34  [CUDA memcpy DtoH]
+29.8596s  3.1119ms                    -               -         -         -         -  19.073MB  5.9853GB/s  GeForce GTX TIT         2        34  [CUDA memcpy DtoH]
+29.8627s  4.9745ms                    -               -         -         -         -  30.548MB  5.9970GB/s  GeForce GTX TIT         2        34  [CUDA memcpy DtoH]
+29.8681s  5.1558ms                    -               -         -         -         -  30.548MB  5.7860GB/s  GeForce GTX TIT         2        38  [CUDA memcpy HtoD]
+29.8733s  3.2217ms                    -               -         -         -         -  19.073MB  5.7813GB/s  GeForce GTX TIT         2        38  [CUDA memcpy HtoD]
+29.8766s  13.873ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        36  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1534]
+29.8766s  3.2214ms                    -               -         -         -         -  19.073MB  5.7819GB/s  GeForce GTX TIT         2        38  [CUDA memcpy HtoD]
+29.8905s  12.304ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        36  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1559]
+29.8905s  4.0608ms                    -               -         -         -         -  19.073MB  4.5866GB/s  GeForce GTX TIT         2        38  [CUDA memcpy HtoD]
+29.8905s  4.0598ms                    -               -         -         -         -  19.073MB  4.5878GB/s  GeForce GTX TIT         2        37  [CUDA memcpy DtoH]
+29.9028s  12.933ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        36  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1585]
+29.9028s  3.9376ms                    -               -         -         -         -  19.073MB  4.7302GB/s  GeForce GTX TIT         2        38  [CUDA memcpy HtoD]
+29.9028s  3.9351ms                    -               -         -         -         -  19.073MB  4.7332GB/s  GeForce GTX TIT         2        37  [CUDA memcpy DtoH]
+29.9158s  13.246ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        36  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1611]
+29.9158s  3.0602ms                    -               -         -         -         -  19.073MB  6.0863GB/s  GeForce GTX TIT         2        37  [CUDA memcpy DtoH]
+29.9291s  3.0909ms                    -               -         -         -         -  19.073MB  6.0260GB/s  GeForce GTX TIT         2        37  [CUDA memcpy DtoH]
+29.9322s  4.9543ms                    -               -         -         -         -  30.548MB  6.0214GB/s  GeForce GTX TIT         2        37  [CUDA memcpy DtoH]
+29.9373s  5.1554ms                    -               -         -         -         -  30.548MB  5.7865GB/s  GeForce GTX TIT         2        41  [CUDA memcpy HtoD]
+29.9425s  3.2220ms                    -               -         -         -         -  19.073MB  5.7807GB/s  GeForce GTX TIT         2        41  [CUDA memcpy HtoD]
+29.9457s  12.637ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        39  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1646]
+29.9457s  3.2215ms                    -               -         -         -         -  19.073MB  5.7817GB/s  GeForce GTX TIT         2        41  [CUDA memcpy HtoD]
+29.9584s  13.569ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        39  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1671]
+29.9584s  4.1193ms                    -               -         -         -         -  19.073MB  4.5215GB/s  GeForce GTX TIT         2        41  [CUDA memcpy HtoD]
+29.9584s  4.1108ms                    -               -         -         -         -  19.073MB  4.5308GB/s  GeForce GTX TIT         2        40  [CUDA memcpy DtoH]
+29.9720s  12.937ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        39  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1697]
+29.9720s  4.1042ms                    -               -         -         -         -  19.073MB  4.5381GB/s  GeForce GTX TIT         2        41  [CUDA memcpy HtoD]
+29.9720s  4.1127ms                    -               -         -         -         -  19.073MB  4.5288GB/s  GeForce GTX TIT         2        40  [CUDA memcpy DtoH]
+29.9850s  12.926ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        39  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1723]
+29.9850s  3.1035ms                    -               -         -         -         -  19.073MB  6.0015GB/s  GeForce GTX TIT         2        40  [CUDA memcpy DtoH]
+29.9980s  3.1087ms                    -               -         -         -         -  19.073MB  5.9915GB/s  GeForce GTX TIT         2        40  [CUDA memcpy DtoH]
+30.0011s  4.9816ms                    -               -         -         -         -  30.548MB  5.9884GB/s  GeForce GTX TIT         2        40  [CUDA memcpy DtoH]
+30.0062s  5.1583ms                    -               -         -         -         -  30.548MB  5.7833GB/s  GeForce GTX TIT         2        44  [CUDA memcpy HtoD]
+30.0114s  3.2219ms                    -               -         -         -         -  19.073MB  5.7809GB/s  GeForce GTX TIT         2        44  [CUDA memcpy HtoD]
+30.0147s  13.885ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        42  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1758]
+30.0147s  3.2212ms                    -               -         -         -         -  19.073MB  5.7821GB/s  GeForce GTX TIT         2        44  [CUDA memcpy HtoD]
+30.0286s  12.912ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        42  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1783]
+30.0286s  4.1195ms                    -               -         -         -         -  19.073MB  4.5213GB/s  GeForce GTX TIT         2        44  [CUDA memcpy HtoD]
+30.0286s  4.1187ms                    -               -         -         -         -  19.073MB  4.5221GB/s  GeForce GTX TIT         2        43  [CUDA memcpy DtoH]
+30.0416s  12.935ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        42  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1809]
+30.0416s  4.1104ms                    -               -         -         -         -  19.073MB  4.5314GB/s  GeForce GTX TIT         2        44  [CUDA memcpy HtoD]
+30.0416s  4.1067ms                    -               -         -         -         -  19.073MB  4.5354GB/s  GeForce GTX TIT         2        43  [CUDA memcpy DtoH]
+30.0545s  14.286ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        42  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1835]
+30.0545s  3.1059ms                    -               -         -         -         -  19.073MB  5.9969GB/s  GeForce GTX TIT         2        43  [CUDA memcpy DtoH]
+30.0688s  3.1165ms                    -               -         -         -         -  19.073MB  5.9765GB/s  GeForce GTX TIT         2        43  [CUDA memcpy DtoH]
+30.0720s  4.9829ms                    -               -         -         -         -  30.548MB  5.9868GB/s  GeForce GTX TIT         2        43  [CUDA memcpy DtoH]
+30.0771s  5.1538ms                    -               -         -         -         -  30.548MB  5.7883GB/s  GeForce GTX TIT         2        47  [CUDA memcpy HtoD]
+30.0823s  3.2242ms                    -               -         -         -         -  19.073MB  5.7768GB/s  GeForce GTX TIT         2        47  [CUDA memcpy HtoD]
+30.0855s  12.759ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        45  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1870]
+30.0856s  3.2253ms                    -               -         -         -         -  19.073MB  5.7748GB/s  GeForce GTX TIT         2        47  [CUDA memcpy HtoD]
+30.0984s  14.019ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        45  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1895]
+30.0984s  4.1061ms                    -               -         -         -         -  19.073MB  4.5360GB/s  GeForce GTX TIT         2        47  [CUDA memcpy HtoD]
+30.0984s  4.0987ms                    -               -         -         -         -  19.073MB  4.5443GB/s  GeForce GTX TIT         2        46  [CUDA memcpy DtoH]
+30.1124s  13.069ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        45  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1921]
+30.1124s  4.1322ms                    -               -         -         -         -  19.073MB  4.5074GB/s  GeForce GTX TIT         2        47  [CUDA memcpy HtoD]
+30.1124s  4.1330ms                    -               -         -         -         -  19.073MB  4.5065GB/s  GeForce GTX TIT         2        46  [CUDA memcpy DtoH]
+30.1255s  13.078ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        45  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1947]
+30.1255s  3.1063ms                    -               -         -         -         -  19.073MB  5.9960GB/s  GeForce GTX TIT         2        46  [CUDA memcpy DtoH]
+30.1386s  3.1113ms                    -               -         -         -         -  19.073MB  5.9864GB/s  GeForce GTX TIT         2        46  [CUDA memcpy DtoH]
+30.1417s  4.9818ms                    -               -         -         -         -  30.548MB  5.9882GB/s  GeForce GTX TIT         2        46  [CUDA memcpy DtoH]
+30.1469s  5.1532ms                    -               -         -         -         -  30.548MB  5.7891GB/s  GeForce GTX TIT         2        50  [CUDA memcpy HtoD]
+30.1520s  3.2202ms                    -               -         -         -         -  19.073MB  5.7840GB/s  GeForce GTX TIT         2        50  [CUDA memcpy HtoD]
+30.1553s  14.125ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        48  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [1982]
+30.1553s  3.2184ms                    -               -         -         -         -  19.073MB  5.7872GB/s  GeForce GTX TIT         2        50  [CUDA memcpy HtoD]
+30.1695s  13.170ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        48  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [2007]
+30.1695s  4.1126ms                    -               -         -         -         -  19.073MB  4.5289GB/s  GeForce GTX TIT         2        50  [CUDA memcpy HtoD]
+30.1695s  4.1170ms                    -               -         -         -         -  19.073MB  4.5240GB/s  GeForce GTX TIT         2        49  [CUDA memcpy DtoH]
+30.1827s  12.922ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        48  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [2033]
+30.1827s  4.1161ms                    -               -         -         -         -  19.073MB  4.5250GB/s  GeForce GTX TIT         2        50  [CUDA memcpy HtoD]
+30.1827s  4.1141ms                    -               -         -         -         -  19.073MB  4.5273GB/s  GeForce GTX TIT         2        49  [CUDA memcpy DtoH]
+30.1957s  13.233ms            (768 1 1)        (32 1 1)        41        0B        0B         -           -  GeForce GTX TIT         2        48  sgd_k128_kernel_hogwild_warp32_lrate(mf_node const *, __int64, __half*, __half*, curandStateXORWOW*, float*, __int64, __int64, int, int, int, int, int, int, float, float, double*, int, int, int, int) [2059]
+30.1957s  3.1029ms                    -               -         -         -         -  19.073MB  6.0026GB/s  GeForce GTX TIT         2        49  [CUDA memcpy DtoH]
+30.2089s  3.1186ms                    -               -         -         -         -  19.073MB  5.9725GB/s  GeForce GTX TIT         2        49  [CUDA memcpy DtoH]
+30.2120s  4.9779ms                    -               -         -         -         -  30.548MB  5.9929GB/s  GeForce GTX TIT         2        49  [CUDA memcpy DtoH]
+30.2195s  5.6772ms                    -               -         -         -         -  30.548MB  5.2547GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.2254s  470.33us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2079]
+30.2258s  10.945ms                    -               -         -         -         -  61.096MB  5.4515GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.2368s  5.7926ms                    -               -         -         -         -  30.548MB  5.1500GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.2427s  458.88us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2089]
+30.2431s  10.947ms                    -               -         -         -         -  61.096MB  5.4503GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.2541s  5.6154ms                    -               -         -         -         -  30.548MB  5.3125GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.2597s  457.31us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2099]
+30.2602s  11.007ms                    -               -         -         -         -  61.096MB  5.4205GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.2713s  5.7619ms                    -               -         -         -         -  30.548MB  5.1774GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.2770s  455.55us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2109]
+30.2775s  10.627ms                    -               -         -         -         -  61.096MB  5.6144GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.2882s  5.7684ms                    -               -         -         -         -  30.548MB  5.1716GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.2940s  464.22us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2119]
+30.2944s  10.763ms                    -               -         -         -         -  61.096MB  5.5436GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3052s  5.8234ms                    -               -         -         -         -  30.548MB  5.1228GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3111s  459.17us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2129]
+30.3115s  10.929ms                    -               -         -         -         -  61.096MB  5.4593GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3225s  5.7883ms                    -               -         -         -         -  30.548MB  5.1538GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3283s  457.25us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2139]
+30.3288s  10.501ms                    -               -         -         -         -  61.096MB  5.6817GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3393s  5.8048ms                    -               -         -         -         -  30.548MB  5.1392GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3452s  455.65us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2149]
+30.3456s  10.689ms                    -               -         -         -         -  61.096MB  5.5819GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3586s  3.2220ms                    -               -         -         -         -  19.073MB  5.7807GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3619s  276.22us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2165]
+30.3621s  6.4535ms                    -               -         -         -         -  38.145MB  5.7722GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3687s  3.6003ms                    -               -         -         -         -  19.073MB  5.1734GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3723s  275.10us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2175]
+30.3726s  6.7654ms                    -               -         -         -         -  38.145MB  5.5061GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3794s  3.6210ms                    -               -         -         -         -  19.073MB  5.1437GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3830s  275.94us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2185]
+30.3833s  6.8015ms                    -               -         -         -         -  38.145MB  5.4769GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.3901s  3.5941ms                    -               -         -         -         -  19.073MB  5.1822GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.3938s  279.07us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2195]
+30.3941s  6.8380ms                    -               -         -         -         -  38.145MB  5.4477GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.4009s  3.4674ms                    -               -         -         -         -  19.073MB  5.3716GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.4044s  275.33us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2205]
+30.4047s  6.8616ms                    -               -         -         -         -  38.145MB  5.4289GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.4116s  3.5955ms                    -               -         -         -         -  19.073MB  5.1802GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.4152s  277.63us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2215]
+30.4155s  6.7735ms                    -               -         -         -         -  38.145MB  5.4995GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.4223s  3.6068ms                    -               -         -         -         -  19.073MB  5.1640GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.4260s  274.30us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2225]
+30.4262s  6.8690ms                    -               -         -         -         -  38.145MB  5.4230GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+30.4331s  3.5273ms                    -               -         -         -         -  19.073MB  5.2805GB/s  GeForce GTX TIT         3        21  [CUDA memcpy HtoD]
+30.4367s  276.26us            (192 1 1)       (256 1 1)        12        0B        0B         -           -  GeForce GTX TIT         3        21  transform_half(__half*, float*, __int64) [2235]
+30.4370s  6.8581ms                    -               -         -         -         -  38.145MB  5.4317GB/s  GeForce GTX TIT         3        21  [CUDA memcpy DtoH]
+
+Regs: Number of registers used per CUDA thread. This number includes registers used internally by the CUDA driver and/or tools and can be more than what the compiler shows.
+SSMem: Static shared memory allocated per CUDA block.
+DSMem: Dynamic shared memory allocated per CUDA block.
+read_problem:/userdata/xiaolong/yahoo/yahoo.test.bin
+m:1000990, n:624961, nnz:4003960
+mf_load_model called
+fun: 0
+m:   1000990
+n:   624961
+k:   128
+b:   1.302
+p_size:128126720
+loading feature p m:1000990 ...
+progress:%0.000
+loading feature q n:624961 ...
+progress:%0.000
+time elapsed:0.53397300s
+
+calculating rmse ...
+RMSE = 30.7379
+time elapsed:0.86463000s
+xiaolong@pci101:~/programming/sgd-dev/sgd_v9.0_yahoo/yahoo_test$
