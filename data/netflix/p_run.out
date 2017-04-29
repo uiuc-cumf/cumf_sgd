@@ -1,0 +1,64 @@
+k          :128
+num_workers:1792
+u_grid     :1
+v_grid     :1
+x_grid     :1
+y_grid     :1
+ux         :1
+vy         :1
+num_iters  :20
+gpu        :1
+lambda_p   :0.05000
+lambda_q   :0.05000
+lrate      :0.00000
+alpha      :0.0800
+beta       :0.3000
+tr_path    :./netflix_mm.bin
+va_path    :
+model_path :netflix_mm.bin.model
+read_problem called
+num_files = 0
+m:480190, n:17771, nnz:99072112
+time elapsed:16.02344200s
+shuffle problem ...
+time elapsed:0.19509200s
+
+
+
+grid problem ...
+swapping ...
+grid swap time:0.34910000s
+
+
+scale problem ...
+time elapsed:0.09400000s
+
+
+
+init model ...
+state_size:480256
+grid:0
+state_size:17920
+grid:0
+time elapsed:0.56028200s
+
+
+
+calling sgd_update_k128() ...
+time elapsed:3.11009300s
+update_per_sec:637100639.755789
+
+
+
+scale model ...
+time elapsed:0.02726500s
+
+
+
+save_model() is called
+saving feature p(480190)...
+saving feature q(17771)...
+time elapsed:0.22464600s
+
+training application finished...
+

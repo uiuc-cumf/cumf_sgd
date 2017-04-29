@@ -1,0 +1,68 @@
+k          :128
+num_workers:1792
+u_grid     :1
+v_grid     :1
+x_grid     :1
+y_grid     :1
+ux         :1
+vy         :1
+num_iters  :20
+gpu        :1
+lambda_p   :1.00000
+lambda_q   :1.00000
+lrate      :0.00000
+alpha      :0.0800
+beta       :0.2000
+tr_path    :./yahoo.train.bin
+va_path    :
+model_path :yahoo.train.bin.model
+read_problem called
+num_files = 16
+Threaded File Read
+m:1000990, n:624961, nnz:252800275
+time elapsed:4.36988650s
+
+
+shuffle problem ...
+time elapsed:0.67531900s
+
+
+
+grid problem ...
+swapping ...
+grid swap time:0.89089100s
+
+
+scale problem ...
+time elapsed:0.24045400s
+
+
+
+init model ...
+state_size:1001216
+grid:0
+state_size:625152
+grid:0
+time elapsed:2.66104600s
+
+
+
+calling sgd_update_k128() ...
+time elapsed:7.31020500s
+update_per_sec:691636623.049559
+
+
+
+scale model ...
+time elapsed:0.08577500s
+
+
+
+save_model() is called
+saving feature p(1000990)...
+saving feature q(624961)...
+time elapsed:0.83721000s
+
+training application finished...
+
+

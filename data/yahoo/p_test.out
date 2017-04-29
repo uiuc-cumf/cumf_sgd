@@ -1,0 +1,18 @@
+read_problem:yahoo.test.bin
+m:1000990, n:624959, nnz:6005940
+mf_load_model called
+fun: 0
+m:   1000990
+n:   624961
+k:   128
+b:   1.280
+p_size:128126720
+loading feature p m:1000990 ...
+progress:%0.000
+loading feature q n:624961 ...
+progress:%0.000
+time elapsed:0.39049400s
+
+calculating rmse ...
+RMSE = 24.7695
+time elapsed:1.54487600s
