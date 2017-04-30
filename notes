@@ -6,7 +6,6 @@
 6. In comparison, Ya- hoo!Music can be solved on multiple GPUs as the dimension of it R is 1M ×625k. We divide its R into 8×8 blocks and run it with two Pascal GPUs. Figure 16 shows the conver- gence speed. With 2 Pascal GPUs, cuMF SGD takes 2.5s to converge to RMSE 22, which is 1.5X as fast as 1 Pascal GPU (3.8s).
 
 hugewiki: http://www.select.cs.cmu.edu/code/graphlab/datasets/hugewiki.gz
-yahoomusic: 链接: https://pan.baidu.com/s/1c2KPxzM 密码: piha
 
 parallel worker = thread block handles 4 random samples in the inner most loop
 blockDim = 128 is 15% faster than blockDim = 32
@@ -21,7 +20,10 @@ larger dataset: search snap.stanford
 
 if m is small and n is large, both libmf and cumf_sgd do not converge
 
+http://sebastianruder.com/optimizing-gradient-descent/
+
 Related Work
 https://github.com/ariyam/submissionALS 2017
 CNTK which uses Microsoft’s special parallelization algorithms of 1-bit quantization (efficient) and block momentum (very efficient)
 http://timdettmers.com/2017/04/09/which-gpu-for-deep-learning/#comments
+
