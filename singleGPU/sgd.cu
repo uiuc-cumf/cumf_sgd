@@ -555,6 +555,9 @@ mf_model *init_model(mf_problem *prob, int k, float ave) {
   cudaMallocHost(&model->hv, sizeof(float) * model->vy * model->v_seg);
   gpuErr(cudaPeekAtLastError());
 
+  fill_n(model->gu, model->ux * model->u_seg, 1.0);
+  fill_n(model->hv, model->vy * model->v_seg, 1.0);
+
   printf("time elapsed:%.8lfs\n", (clock() - start) / (double)CLOCKS_PER_SEC);
   printf("\n\n\n");
 

@@ -26,60 +26,67 @@ __global__ void sgd_k128_kernel_hogwild_warp32_lrate(
         int offset = (start_id + i) % nnz;
 
         // stored in COO format
-        float e = __ldg(&R[offset].rate);
+        float ruv = __ldg(&R[offset].rate);
         int u = __ldg(&R[offset].u);
         int v = __ldg(&R[offset].v);
 
-        // read the p & q into register file
         int base_p = u * k;
         int base_q = v * k;
 
-        float tmp_p1 = __half2float(p[base_p + lane_id]);
-        float tmp_q1 = __half2float(q[base_q + lane_id]);
+        float p_lrate = tmp_lrate;
+        float q_lrate = tmp_lrate;
 
-        float tmp_p2 = __half2float(p[base_p + lane_id + 32]);
-        float tmp_q2 = __half2float(q[base_q + lane_id + 32]);
+        // read p and q into registers
+        float p1 = __half2float(p[base_p + lane_id]);
+        float q1 = __half2float(q[base_q + lane_id]);
 
-        float tmp_p3 = __half2float(p[base_p + lane_id + 64]);
-        float tmp_q3 = __half2float(q[base_q + lane_id + 64]);
+        float p2 = __half2float(p[base_p + lane_id + 32]);
+        float q2 = __half2float(q[base_q + lane_id + 32]);
 
-        float tmp_p4 = __half2float(p[base_p + lane_id + 96]);
-        float tmp_q4 = __half2float(q[base_q + lane_id + 96]);
+        float p3 = __half2float(p[base_p + lane_id + 64]);
+        float q3 = __half2float(q[base_q + lane_id + 64]);
 
-        float tmp_product = tmp_p1 * tmp_q1 + tmp_p2 * tmp_q2 +
-                            tmp_p3 * tmp_q3 + tmp_p4 * tmp_q4;
+        float p4 = __half2float(p[base_p + lane_id + 96]);
+        float q4 = __half2float(q[base_q + lane_id + 96]);
 
-        // get dot product
-        tmp_product += __shfl_down(tmp_product, 16);
-        tmp_product += __shfl_down(tmp_product, 8);
-        tmp_product += __shfl_down(tmp_product, 4);
-        tmp_product += __shfl_down(tmp_product, 2);
-        tmp_product += __shfl_down(tmp_product, 1);
+        // get dot product p x q
+        float pq = p1 * q1 + p2 * q2 + p3 * q3 + p4 * q4;
+        pq += __shfl_down(pq, 16);
+        pq += __shfl_down(pq, 8);
+        pq += __shfl_down(pq, 4);
+        pq += __shfl_down(pq, 2);
+        pq += __shfl_down(pq, 1);
+        pq = __shfl(pq, 0);
 
-        tmp_product = __shfl(tmp_product, 0);
+        // error
+        float err = ruv - pq;
 
-        float ruv = e - tmp_product;
+        // calculate gradient gu and hv
+        float p1_gu = - err * q1 + lambda_p * p1;
+        float p2_gu = - err * q2 + lambda_p * p2;
+        float p3_gu = - err * q3 + lambda_p * p3;
+        float p4_gu = - err * q4 + lambda_p * p4;
 
-        // update
-        p[base_p + lane_id + 0] = __float2half(
-            tmp_p1 + tmp_lrate * (ruv * tmp_q1 - lambda_p * tmp_p1));
-        q[base_q + lane_id + 0] = __float2half(
-            tmp_q1 + tmp_lrate * (ruv * tmp_p1 - lambda_q * tmp_q1));
+        float q1_hv = - err * p1 + lambda_q * q1;
+        float q2_hv = - err * p2 + lambda_q * q2;
+        float q3_hv = - err * p3 + lambda_q * q3;
+        float q4_hv = - err * p4 + lambda_q * q4;
 
-        p[base_p + lane_id + 32] = __float2half(
-            tmp_p2 + tmp_lrate * (ruv * tmp_q2 - lambda_p * tmp_p2));
-        q[base_q + lane_id + 32] = __float2half(
-            tmp_q2 + tmp_lrate * (ruv * tmp_p2 - lambda_q * tmp_q2));
 
-        p[base_p + lane_id + 64] = __float2half(
-            tmp_p3 + tmp_lrate * (ruv * tmp_q3 - lambda_p * tmp_p3));
-        q[base_q + lane_id + 64] = __float2half(
-            tmp_q3 + tmp_lrate * (ruv * tmp_p3 - lambda_q * tmp_q3));
+        // update p and q
+        p[base_p + lane_id + 0] = __float2half(p1 - p_lrate * p1_gu);
+        q[base_q + lane_id + 0] = __float2half(q1 - q_lrate * q1_hv);
 
-        p[base_p + lane_id + 96] = __float2half(
-            tmp_p4 + tmp_lrate * (ruv * tmp_q4 - lambda_p * tmp_p4));
-        q[base_q + lane_id + 96] = __float2half(
-            tmp_q4 + tmp_lrate * (ruv * tmp_p4 - lambda_q * tmp_q4));
+        p[base_p + lane_id + 32] = __float2half(p2 - p_lrate * p2_gu);
+        q[base_q + lane_id + 32] = __float2half(q2 - q_lrate * q2_hv);
+
+        p[base_p + lane_id + 64] = __float2half(p3 - p_lrate * p3_gu);
+        q[base_q + lane_id + 64] = __float2half(q3 - q_lrate * q3_hv);
+
+        p[base_p + lane_id + 96] = __float2half(p4 - p_lrate * p4_gu);
+        q[base_q + lane_id + 96] = __float2half(q4 - q_lrate * q4_hv);
+
+
       }
     }
   }
@@ -122,8 +129,8 @@ __global__ void sgd_k128_kernel_hogwild_warp32_rpcs(
         int base_p = u * k;
         int base_q = v * k;
 
-        float p_lrate = LR * rsqrt(gu[base_p]);
-        float q_lrate = LR * rsqrt(hv[base_q]);
+        float p_lrate = LR * rsqrt(gu[u]);
+        float q_lrate = LR * rsqrt(hv[v]);
 
         // read p and q into registers
         float p1 = __half2float(p[base_p + lane_id]);
@@ -151,15 +158,15 @@ __global__ void sgd_k128_kernel_hogwild_warp32_rpcs(
         float err = ruv - pq;
 
         // calculate gradient gu and hv
-        float p1_gu = -err * q1 + lambda_p * p1;
-        float p2_gu = -err * q2 + lambda_p * p2;
-        float p3_gu = -err * q3 + lambda_p * p3;
-        float p4_gu = -err * q4 + lambda_p * p4;
+        float p1_gu = - err * q1 + lambda_p * p1;
+        float p2_gu = - err * q2 + lambda_p * p2;
+        float p3_gu = - err * q3 + lambda_p * p3;
+        float p4_gu = - err * q4 + lambda_p * p4;
 
-        float q1_hv = -err * p1 + lambda_q * q1;
-        float q2_hv = -err * p2 + lambda_q * q2;
-        float q3_hv = -err * p2 + lambda_q * q2;
-        float q4_hv = -err * p3 + lambda_q * q3;
+        float q1_hv = - err * p1 + lambda_q * q1;
+        float q2_hv = - err * p2 + lambda_q * q2;
+        float q3_hv = - err * p3 + lambda_q * q3;
+        float q4_hv = - err * p4 + lambda_q * q4;
 
         // update p and q
         p[base_p + lane_id + 0] = __float2half(p1 - p_lrate * p1_gu);
@@ -186,7 +193,7 @@ __global__ void sgd_k128_kernel_hogwild_warp32_rpcs(
 
         // lane 0 updates gu
         if (lane_id == 0) {
-          gu[base_p] += gugu / k;
+          gu[u] += gugu / k;
         }
 
         // hv x hv
@@ -201,7 +208,7 @@ __global__ void sgd_k128_kernel_hogwild_warp32_rpcs(
 
         // lane 0 updates gu
         if (lane_id == 0) {
-          hv[base_q] += hvhv / k;
+          hv[v] += hvhv / k;
         }
       }  
     }
