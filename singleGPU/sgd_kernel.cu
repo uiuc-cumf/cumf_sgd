@@ -116,7 +116,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
 
   // generate the random state for the hogwild scheduling policy.
   curandState *rand_state;
-  cudaMalloc(&rand_state, sizeof(curandState) * para.num_workers);
+  cudaMalloc((void **)&rand_state, sizeof(curandState) * para.num_workers);
   gpuErr(cudaPeekAtLastError());
 
   init_rand_state<<<((para.num_workers + 255) / 256), 256>>>(rand_state,
@@ -161,6 +161,15 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
   if (prob->x_grid * prob->y_grid == 1) {
     cudaMalloc(&model->gpuHalfp, sizeof(half) * model->u_seg * model->k);
     cudaMalloc(&model->gpuHalfq, sizeof(half) * model->v_seg * model->k);
+
+    // rpcs
+    cudaMalloc(&model->gpuGu, sizeof(float) * model->u_seg);
+    cudaMalloc(&model->gpuHv, sizeof(float) * model->v_seg);
+    gpuErr(cudaPeekAtLastError());
+    cudaMemset(model->gpuGu, 1, sizeof(float) * model->u_seg);
+    cudaMemset(model->gpuHv, 1, sizeof(float) * model->v_seg);
+    gpuErr(cudaPeekAtLastError());
+
     model->cur_u_id = -1;
     model->cur_v_id = -1;
   } else {
@@ -191,7 +200,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
   double *gpu_iter_err = NULL;
 
   // run the update kernel
-  if (prob->u_grid * prob->v_grid == 1) { 
+  if (prob->u_grid * prob->v_grid == 1) {
     // dataset fits in memory, no need to do data parition, 1 grid
 
     cudaMemcpy(prob->gpuR, prob->R2D[0], sizeof(mf_node) * prob->gridSize[0],
@@ -200,6 +209,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
                sizeof(half) * model->u_seg * model->k, cudaMemcpyHostToDevice);
     cudaMemcpy(model->gpuHalfq, model->halfq,
                sizeof(half) * model->v_seg * model->k, cudaMemcpyHostToDevice);
+    gpuErr(cudaPeekAtLastError());
 
     clock_t start = clock();
 
@@ -209,7 +219,19 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
         para.num_iters, 0, max_update_count_per_block,
         update_count_per_block[0], update_vector_size, para.lambda_p,
         para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0);
+
+    // rpcs
+    // sgd_k128_kernel_hogwild_warp32_rpcs<<<para.num_workers / 4, 128>>>(
+    //     prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
+    //     rand_state, model->u_seg, model->v_seg, model->k,
+    //     para.num_iters, 0, max_update_count_per_block,
+    //     update_count_per_block[0], update_vector_size, para.lambda_p,
+    //     para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
+    //     model->gpuGu, model->gpuHv);
+
+    gpuErr(cudaPeekAtLastError());
     cudaDeviceSynchronize();
+
     double time_ela = (clock() - start) / double(CLOCKS_PER_SEC);
     printf("time elapsed:%.8fs\n", time_ela);
     printf("update_per_sec:%f\n", prob->nnz * para.num_iters / time_ela);
@@ -217,11 +239,16 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
 
     cudaMemcpy(model->halfp, model->gpuHalfp,
                sizeof(half) * model->u_seg * model->k, cudaMemcpyDeviceToHost);
+    gpuErr(cudaPeekAtLastError());
+
     cudaMemcpy(model->halfq, model->gpuHalfq,
                sizeof(half) * model->v_seg * model->k, cudaMemcpyDeviceToHost);
+    gpuErr(cudaPeekAtLastError());
+
   } else if (prob->x_grid * prob->y_grid == 1) {
-    // dataset does not fit in memory, needs data parition uv, no double buffering
-    // 50% 
+    // dataset does not fit in memory, needs data parition uv, no double
+    // buffering
+    // 50%
     clock_t start = clock();
 
     // random shuffle
@@ -335,7 +362,8 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
       gpuErr(cudaPeekAtLastError());
     }
   } else {
-    // dataset does not fit in memory, needs data parition uv, xy, use double buffering
+    // dataset does not fit in memory, needs data parition uv, xy, use double
+    // buffering
     // each time schedule xy blocks into a stream
 
     clock_t start = clock();

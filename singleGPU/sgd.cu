@@ -480,27 +480,32 @@ void init_feature(short *feature_vec, int grid, long long seg, int k) {
   float scale = (float)sqrt(1.0 / k);
 
   half *gpu_vec;
-  cudaMalloc(&gpu_vec, seg * k * sizeof(half));
+  cudaMalloc((void **)&gpu_vec, seg * k * sizeof(half));
+  gpuErr(cudaPeekAtLastError());
 
   curandState *d_state;
   int state_size = (seg / 256 + 1) * 256;
   printf("state_size:%d\n", state_size);
 
-  cudaMalloc(&d_state, sizeof(curandState) * state_size);
+  cudaMalloc((void **)&d_state, sizeof(curandState) * state_size);
+  gpuErr(cudaPeekAtLastError());
 
   init_rand_state<<<state_size / 256, 256>>>(d_state);
+  gpuErr(cudaPeekAtLastError());
+
+  int blockSize = 256;
+  int blockNum = (seg * k + 255) / 256;
 
   for (int i = 0; i < grid; i++) {
     printf("grid:%d\n", i);
-    int blockSize = 256, blockNum = 1;
-    blockNum = (seg * k + 255) / 256;
-    // printf("\tblockNum:%d\n", blockNum);
-    // printf("\tarraysize:%lld\n", seg*k);
-
+    
     random_init<<<blockNum, blockSize>>>(d_state, state_size, gpu_vec, seg * k,
                                          k, scale);
+    gpuErr(cudaPeekAtLastError());
+
     cudaMemcpy(feature_vec + i * seg * k, gpu_vec, sizeof(half) * seg * k,
                cudaMemcpyDeviceToHost);
+    gpuErr(cudaPeekAtLastError());
   }
 
   cudaFree(d_state);
@@ -535,15 +540,20 @@ mf_model *init_model(mf_problem *prob, int k, float ave) {
   // allocate memory
   cudaMallocHost(&model->floatp, sizeof(float) * model->ux * model->u_seg * k);
   cudaMallocHost(&model->floatq, sizeof(float) * model->vy * model->v_seg * k);
-
+  gpuErr(cudaPeekAtLastError());
+  
   cudaMallocHost(&model->halfp, sizeof(short) * model->ux * model->u_seg * k);
   cudaMallocHost(&model->halfq, sizeof(short) * model->vy * model->v_seg * k);
-
   gpuErr(cudaPeekAtLastError());
 
   // random init
   init_feature(model->halfp, model->ux, model->u_seg, k);
   init_feature(model->halfq, model->vy, model->v_seg, k);
+
+  // rpcs
+  cudaMallocHost(&model->gu, sizeof(float) * model->ux * model->u_seg);
+  cudaMallocHost(&model->hv, sizeof(float) * model->vy * model->v_seg);
+  gpuErr(cudaPeekAtLastError());
 
   printf("time elapsed:%.8lfs\n", (clock() - start) / (double)CLOCKS_PER_SEC);
   printf("\n\n\n");

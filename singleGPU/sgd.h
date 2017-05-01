@@ -122,6 +122,7 @@ struct mf_model {
 
   half *gpuHalfp;
   half *gpuHalfq;
+
   int cur_u_id;
   int cur_v_id;
 
@@ -130,6 +131,12 @@ struct mf_model {
 
   int cur_global_x_id[2];
   int cur_global_y_id[2];
+
+  // rpcs
+  float *gu;
+  float *hv;
+  float *gpuGu;
+  float *gpuHv;
 };
 
 mf_problem read_problem(string path);
