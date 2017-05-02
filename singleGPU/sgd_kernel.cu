@@ -221,7 +221,6 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
 
 #ifdef RPCS
     printf("RPCS\n");
-
     sgd_k128_kernel_hogwild_warp32_rpcs<<<para.num_workers / 4, 128>>>(
         prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
         rand_state, model->u_seg, model->v_seg, model->k,

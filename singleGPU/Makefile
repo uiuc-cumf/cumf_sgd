@@ -1,12 +1,12 @@
-CU_FLAG= -D_FORCE_INLINES -gencode arch=compute_60,code=compute_60
+CU_FLAG= -D_FORCE_INLINES -gencode arch=compute_60,code=compute_60 -Wno-deprecated-gpu-targets
 
 all: cumf_sgd cumf_sgd_rpcs
 
 cumf_sgd: main.o sgd.o sgd_kernel.o
-	nvcc main.o sgd.o sgd_kernel.o -o cumf_sgd -Xcompiler -fopenmp -DUSEOMP -Xcompiler -g -lrt
+	nvcc main.o sgd.o sgd_kernel.o -o cumf_sgd -Xcompiler -fopenmp -DUSEOMP -Xcompiler -g -lrt -lrt -Wno-deprecated-gpu-targets
 
 cumf_sgd_rpcs: main.o sgd.o sgd_kernel_rpcs.o
-	nvcc main.o sgd.o sgd_kernel.o -o cumf_sgd_rpcs -Xcompiler -fopenmp -DUSEOMP -Xcompiler -g -lrt
+	nvcc main.o sgd.o sgd_kernel_rpcs.o -o cumf_sgd_rpcs -Xcompiler -fopenmp -DUSEOMP -Xcompiler -g -lrt -Wno-deprecated-gpu-targets
 
 main.o: main.cpp sgd.h 
 	nvcc -c main.cpp -std=c++11 -DUSEOMP -Xcompiler -fopenmp -O3 -I /usr/local/cuda/include -Xcompiler -g
