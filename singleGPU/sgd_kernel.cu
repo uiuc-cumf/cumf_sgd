@@ -162,10 +162,11 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     cudaMalloc(&model->gpuHalfp, sizeof(half) * model->u_seg * model->k);
     cudaMalloc(&model->gpuHalfq, sizeof(half) * model->v_seg * model->k);
 
-    // rpcs
+#ifdef RPCS
     cudaMalloc(&model->gpuGu, sizeof(float) * model->u_seg);
     cudaMalloc(&model->gpuHv, sizeof(float) * model->v_seg);
     gpuErr(cudaPeekAtLastError());
+#endif
 
     model->cur_u_id = -1;
     model->cur_v_id = -1;
@@ -208,24 +209,19 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
                sizeof(half) * model->v_seg * model->k, cudaMemcpyHostToDevice);
     gpuErr(cudaPeekAtLastError());
 
-
-    // rpcs
+#ifdef RPCS
     cudaMemcpy(model->gpuGu, model->gu,
                sizeof(float) * model->u_seg, cudaMemcpyHostToDevice);
     cudaMemcpy(model->gpuHv, model->hv,
                sizeof(float) * model->v_seg, cudaMemcpyHostToDevice);
     gpuErr(cudaPeekAtLastError());
+#endif
 
     clock_t start = clock();
 
-    // sgd_k128_kernel_hogwild_warp32_lrate<<<para.num_workers / 4, 128>>>(
-    //     prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
-    //     rand_state, gpu_dynamic_rate, model->u_seg, model->v_seg, model->k,
-    //     para.num_iters, 0, max_update_count_per_block,
-    //     update_count_per_block[0], update_vector_size, para.lambda_p,
-    //     para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0);
+#ifdef RPCS
+    printf("RPCS\n");
 
-    // rpcs
     sgd_k128_kernel_hogwild_warp32_rpcs<<<para.num_workers / 4, 128>>>(
         prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
         rand_state, model->u_seg, model->v_seg, model->k,
@@ -233,6 +229,15 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
         update_count_per_block[0], update_vector_size, para.lambda_p,
         para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
         model->gpuGu, model->gpuHv);
+#else 
+    printf("MDS\n");
+    sgd_k128_kernel_hogwild_warp32_lrate<<<para.num_workers / 4, 128>>>(
+        prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
+        rand_state, gpu_dynamic_rate, model->u_seg, model->v_seg, model->k,
+        para.num_iters, 0, max_update_count_per_block,
+        update_count_per_block[0], update_vector_size, para.lambda_p,
+        para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0);
+#endif
 
     cudaDeviceSynchronize();
     gpuErr(cudaPeekAtLastError());

@@ -92,9 +92,7 @@ __global__ void sgd_k128_kernel_hogwild_warp32_lrate(
   }
 }
 
-// rpcs
 #define LR 0.1
-
 __global__ void sgd_k128_kernel_hogwild_warp32_rpcs(
     const mf_node *R, long long nnz, half *p, half *q, curandState *state,
     long long u_seg, long long v_seg, int k, int num_iters, int current_iter,
