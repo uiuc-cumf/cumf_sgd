@@ -137,6 +137,12 @@ struct mf_model {
   float *hv;
   float *gpuGu;
   float *gpuHv;
+
+  // rpcs_fast and rpcs_tl
+  bool *gu_b;
+  bool *hv_b;
+  bool *gpuGu_b;
+  bool *gpuHv_b;
 };
 
 mf_problem read_problem(string path);

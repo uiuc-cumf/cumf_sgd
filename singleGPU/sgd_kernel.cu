@@ -166,6 +166,11 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     cudaMalloc(&model->gpuGu, sizeof(float) * model->u_seg);
     cudaMalloc(&model->gpuHv, sizeof(float) * model->v_seg);
     gpuErr(cudaPeekAtLastError());
+#ifdef FAST
+    cudaMalloc(&model->gpuGu_b, sizeof(bool) * model->u_seg);
+    cudaMalloc(&model->gpuHv_b, sizeof(bool) * model->v_seg);
+    gpuErr(cudaPeekAtLastError());
+#endif
 #endif
 
     model->cur_u_id = -1;
@@ -215,11 +220,29 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     cudaMemcpy(model->gpuHv, model->hv,
                sizeof(float) * model->v_seg, cudaMemcpyHostToDevice);
     gpuErr(cudaPeekAtLastError());
+
+#ifdef FAST
+    cudaMemcpy(model->gpuGu_b, model->gu_b,
+               sizeof(bool) * model->u_seg, cudaMemcpyHostToDevice);
+    cudaMemcpy(model->gpuHv_b, model->hv_b,
+               sizeof(bool) * model->v_seg, cudaMemcpyHostToDevice);
+    gpuErr(cudaPeekAtLastError());
+#endif
 #endif
 
     clock_t start = clock();
 
 #ifdef RPCS
+#ifdef FAST
+    printf("RPCS_FAST\n");
+    sgd_k128_kernel_hogwild_warp32_rpcs_fast<<<para.num_workers / 4, 128>>>(
+        prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
+        rand_state, model->u_seg, model->v_seg, model->k,
+        para.num_iters, 0, max_update_count_per_block,
+        update_count_per_block[0], update_vector_size, para.lambda_p,
+        para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
+        model->gpuGu, model->gpuHv, model->gpuGu_b, model->gpuHv_b);
+#else
     printf("RPCS\n");
     sgd_k128_kernel_hogwild_warp32_rpcs<<<para.num_workers / 4, 128>>>(
         prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
@@ -228,7 +251,8 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
         update_count_per_block[0], update_vector_size, para.lambda_p,
         para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
         model->gpuGu, model->gpuHv);
-#else 
+#endif
+#else
     printf("MDS\n");
     sgd_k128_kernel_hogwild_warp32_lrate<<<para.num_workers / 4, 128>>>(
         prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
@@ -242,7 +266,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     gpuErr(cudaPeekAtLastError());
 
     double time_ela = (clock() - start) / double(CLOCKS_PER_SEC);
-    printf("time elapsed:%.8fs\n", time_ela);
+    printf("sgd_update_k128:%.8fs\n", time_ela);
     printf("update_per_sec:%f\n", prob->nnz * para.num_iters / time_ela);
     printf("\n\n\n");
 
@@ -256,8 +280,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
 
   } else if (prob->x_grid * prob->y_grid == 1) {
     // dataset does not fit in memory, needs data parition uv, no double
-    // buffering
-    // 50%
+    // buffering, 50%
     clock_t start = clock();
 
     // random shuffle
