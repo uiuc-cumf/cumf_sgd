@@ -12,7 +12,7 @@ cumf_sgd_rpcs_fast: main.o sgd.o sgd_kernel_rpcs_fast.o
 	nvcc main.o sgd.o sgd_kernel_rpcs_fast.o -o cumf_sgd_rpcs_fast -Xcompiler -fopenmp -DUSEOMP -Xcompiler -g -lrt -Wno-deprecated-gpu-targets
 
 sgd_kernel.o: sgd_kernel.cu sgd_kernel.h sgd_k128_kernel_hogwild_warp32.h
-	nvcc -c sgd_kernel.cu -o sgd_kernel.o -std=c++11 -Xcompiler -fopenmp -O3 -Xcompiler -mtune=native -DUSEOMP $(CU_FLAG) -Xptxas -v -I /usr/local/cuda/include -Xcompiler -g
+	nvcc -c sgd_kernel.cu -o sgd_kernel.o -std=c++11 -Xcompiler -fopenmp -O3 -Xcompiler -mtune=native -DUSEOMP $(CU_FLAG) -Xptxas -v -I /usr/local/cuda/include -Xcompiler -g 
 
 sgd_kernel_rpcs.o: sgd_kernel.cu sgd_kernel.h sgd_k128_kernel_hogwild_warp32.h
 	nvcc -D RPCS -c sgd_kernel.cu -o sgd_kernel_rpcs.o -std=c++11 -Xcompiler -fopenmp -O3 -Xcompiler -mtune=native -DUSEOMP $(CU_FLAG) -Xptxas -v -I /usr/local/cuda/include -Xcompiler -g
@@ -27,4 +27,4 @@ sgd.o: sgd.cu sgd.h
 	nvcc -c sgd.cu -o sgd.o -std=c++11 -Xcompiler -fopenmp -O3 -Xcompiler -mtune=native -DUSEOMP $(CU_FLAG) -I /usr/local/cuda/include -Xcompiler -g -lpthread
 
 clean:
-	rm -f cumf_sgd cumf_sgd_rpcs *.o
+	rm -f cumf_sgd cumf_sgd_rpcs cumf_sgd_fast *.o

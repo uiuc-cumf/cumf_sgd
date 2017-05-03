@@ -266,7 +266,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     gpuErr(cudaPeekAtLastError());
 
     double time_ela = (clock() - start) / double(CLOCKS_PER_SEC);
-    printf("sgd_update_k128:%.8fs\n", time_ela);
+    printf("sgd_update_k128:%.8f\n", time_ela);
     printf("update_per_sec:%f\n", prob->nnz * para.num_iters / time_ela);
     printf("\n\n\n");
 
@@ -376,9 +376,12 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
       cudaDeviceSynchronize();
     }
     cudaDeviceSynchronize();
-    printf("time elapsed:%.8fs\n", (clock() - start) / double(CLOCKS_PER_SEC));
 
-    printf("%d,%d\n", model->cur_u_id, model->cur_v_id);
+    double time_ela = (clock() - start) / double(CLOCKS_PER_SEC);
+    printf("sgd_update_k128:%.8f\n", time_ela);
+    printf("update_per_sec:%f\n", prob->nnz * para.num_iters / time_ela);
+    printf("\n\n\n");
+
     // transfer p back to CPU
     if (model->cur_u_id >= 0) {
       short *p_tmp = model->halfp + model->u_seg * model->k * model->cur_u_id;
@@ -651,7 +654,11 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
       cudaDeviceSynchronize();
     }
     cudaDeviceSynchronize();
-    printf("time elapsed:%.8fs\n", (clock() - start) / double(CLOCKS_PER_SEC));
+
+    double time_ela = (clock() - start) / double(CLOCKS_PER_SEC);
+    printf("sgd_update_k128:%.8f\n", time_ela);
+    printf("update_per_sec:%f\n", prob->nnz * para.num_iters / time_ela);
+    printf("\n\n\n");
 
     // transfer p back
     if (model->cur_global_x_id[0] != -1) {

@@ -19,8 +19,9 @@ extern __global__ void init_block_lock(bool*row, bool*col, int b);
 #include "sgd_k128_kernel_hogwild_warp32.h"
 
 
-#define GPUS 1
-#define Q_PER_CPU_KERNEL 1
+#define GPUS 2
+#define Q_PER_CPU_KERNEL 4
+
 
 
 __global__ void init_rand_state(curandState*state, int size)
@@ -167,15 +168,19 @@ void *kernel_thread_generic(void *argument)
 
 	p_index = (local_ite / iterationsToProcessFullQ)*GPUS + gpu_id;
 	//transfer p_index from cpu to GPU
-	cudaMemcpyAsync(model->gpuPtrs[gpu_id].gpu_p,
-		model->halfp + p_index*model->u_seg*model->k,
-		sizeof(half)*model->u_seg*model->k,
-		cudaMemcpyHostToDevice,
-		stream_mem_h2d);
+	
+	
+	if((local_ite % qitems_per_kernel) == 0)
+		cudaMemcpyAsync(model->gpuPtrs[gpu_id].gpu_p,
+			model->halfp + p_index*model->u_seg*model->k,
+			sizeof(half)*model->u_seg*model->k,
+			cudaMemcpyHostToDevice,
+			stream_mem_h2d);
 
+	int base = ((local_ite ) % iterationsToProcessFullQ)  *  qitems_per_kernel;
 	for (int i = 0; i < qitems_per_kernel; i++)
 	{
-		q_index[i] =  (local_ite % iterationsToProcessFullQ)  *  qitems_per_kernel + i;	
+		q_index[i] =  base + i;	
 	}
 
 	// Start with first q: q[0]
@@ -185,12 +190,13 @@ void *kernel_thread_generic(void *argument)
 		cudaMemcpyHostToDevice,
 		stream_mem_h2d
 	);
+	
 	cudaDeviceSynchronize();
 	int s = 0;
 	for (; s < qitems_per_kernel; s++)
 	{
 		int grid_id = p_index * my_argument->u_grid + q_index[s];
-		sgd_k128_kernel_hogwild_warp32_lrate << <model->para.num_blocks, 32, 0, stream_com >> >(
+		sgd_k128_kernel_hogwild_warp32_lrate_128threads << <model->para.num_blocks/4, 32*4, 0, stream_com >> >(
 			model->gpuPtrs[gpu_id].R2D[grid_id],
 			model->gpuPtrs[gpu_id].gridSize[grid_id],
 			model->gpuPtrs[gpu_id].gpu_p,
@@ -231,11 +237,12 @@ void *kernel_thread_generic(void *argument)
 	}
 
 	//transfer p_index back to cpu
-	cudaMemcpyAsync(model->halfp + p_index*model->u_seg*model->k,
-		model->gpuPtrs[gpu_id].gpu_p,
-		sizeof(half)*model->u_seg*model->k,
-		cudaMemcpyDeviceToHost,
-		stream_mem_d2h);
+	if((local_ite % qitems_per_kernel) == qitems_per_kernel-1 )
+		cudaMemcpyAsync(model->halfp + p_index*model->u_seg*model->k,
+			model->gpuPtrs[gpu_id].gpu_p,
+			sizeof(half)*model->u_seg*model->k,
+			cudaMemcpyDeviceToHost,
+			stream_mem_d2h);
 
 	cudaDeviceSynchronize();
 }
@@ -352,8 +359,9 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob, float sc
 		cudaMemcpy(model->gpuHalfq, model->halfq, sizeof(half)*model->v_seg*model->k, cudaMemcpyHostToDevice);
 
 		clock_t start = clock();
+		
 
-		sgd_k128_kernel_hogwild_warp32_lrate << <para.num_blocks, 32 >> >(
+		sgd_k128_kernel_hogwild_warp32_lrate_128threads << <para.num_blocks/4, 32*4 >> >(
 			prob->gpuR,
 			prob->gridSize[0],
 			model->gpuHalfp,
