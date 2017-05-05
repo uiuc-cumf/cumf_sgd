@@ -129,7 +129,7 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
   float beta = para.beta;
   float lrate = para.lrate;
   for (int i = 0; i < (para.num_iters + 4); i++) {
-    double tmp_rate = alpha / (1 + beta * pow(i, 1.5)) + lrate;
+    double tmp_rate = alpha / (1 + beta * pow(i, 1.5));
     dynamic_rate[i] = tmp_rate;
   }
 
@@ -162,13 +162,24 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
     cudaMalloc(&model->gpuHalfp, sizeof(half) * model->u_seg * model->k);
     cudaMalloc(&model->gpuHalfq, sizeof(half) * model->v_seg * model->k);
 
+#ifdef MOM
+    cudaMalloc(&model->gpuVu, sizeof(float) * model->u_seg * model->k);
+    cudaMalloc(&model->gpuVv, sizeof(float) * model->v_seg * model->k);
+    gpuErr(cudaPeekAtLastError());
+#endif
+
 #ifdef RPCS
     cudaMalloc(&model->gpuGu, sizeof(float) * model->u_seg);
     cudaMalloc(&model->gpuHv, sizeof(float) * model->v_seg);
     gpuErr(cudaPeekAtLastError());
 #ifdef FAST
-    cudaMalloc(&model->gpuGu_b, sizeof(bool) * model->u_seg);
-    cudaMalloc(&model->gpuHv_b, sizeof(bool) * model->v_seg);
+#ifdef TL
+    cudaMalloc(&model->gpuGu_f, sizeof(float) * model->u_seg);
+    cudaMalloc(&model->gpuHv_f, sizeof(float) * model->v_seg);
+    gpuErr(cudaPeekAtLastError());
+#endif 
+    cudaMalloc(&model->gpuGu_cnt, sizeof(int) * model->u_seg);
+    cudaMalloc(&model->gpuHv_cnt, sizeof(int) * model->v_seg);
     gpuErr(cudaPeekAtLastError());
 #endif
 #endif
@@ -214,26 +225,59 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
                sizeof(half) * model->v_seg * model->k, cudaMemcpyHostToDevice);
     gpuErr(cudaPeekAtLastError());
 
+#ifdef MOM
+    cudaMemcpy(model->gpuVu, model->vu,
+               sizeof(float) * model->u_seg * model->k, cudaMemcpyHostToDevice);
+    cudaMemcpy(model->gpuVv, model->vv,
+               sizeof(float) * model->v_seg * model->k, cudaMemcpyHostToDevice);
+    gpuErr(cudaPeekAtLastError());
+#endif
+
 #ifdef RPCS
     cudaMemcpy(model->gpuGu, model->gu,
                sizeof(float) * model->u_seg, cudaMemcpyHostToDevice);
     cudaMemcpy(model->gpuHv, model->hv,
                sizeof(float) * model->v_seg, cudaMemcpyHostToDevice);
     gpuErr(cudaPeekAtLastError());
-
 #ifdef FAST
-    cudaMemcpy(model->gpuGu_b, model->gu_b,
-               sizeof(bool) * model->u_seg, cudaMemcpyHostToDevice);
-    cudaMemcpy(model->gpuHv_b, model->hv_b,
-               sizeof(bool) * model->v_seg, cudaMemcpyHostToDevice);
+    cudaMemcpy(model->gpuGu_cnt, model->gu_cnt,
+               sizeof(int) * model->u_seg, cudaMemcpyHostToDevice);
+    cudaMemcpy(model->gpuHv_cnt, model->hv_cnt,
+               sizeof(int) * model->v_seg, cudaMemcpyHostToDevice);
     gpuErr(cudaPeekAtLastError());
+#ifdef TL
+    cudaMemcpy(model->gpuGu_f, model->gu_f,
+               sizeof(float) * model->u_seg, cudaMemcpyHostToDevice);
+    cudaMemcpy(model->gpuHv_f, model->hv_f,
+               sizeof(float) * model->v_seg, cudaMemcpyHostToDevice);
+    gpuErr(cudaPeekAtLastError());
+#endif
 #endif
 #endif
 
     clock_t start = clock();
 
-#ifdef RPCS
+#ifdef MOM
+    printf("MOM\n");
+    sgd_k128_kernel_hogwild_warp32_mom<<<para.num_workers / 4, 128>>>(
+        prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
+        rand_state, model->u_seg, model->v_seg, model->k,
+        para.num_iters, 0, max_update_count_per_block,
+        update_count_per_block[0], update_vector_size, para.lambda_p,
+        para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
+        model->gpuVu, model->gpuVv);
+#elif defined RPCS
 #ifdef FAST
+#ifdef TL
+    printf("RPCS_FAST_TL\n");
+    sgd_k128_kernel_hogwild_warp32_rpcs_fast_tl<<<para.num_workers / 4, 128>>>(
+        prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
+        rand_state, model->u_seg, model->v_seg, model->k,
+        para.num_iters, 0, max_update_count_per_block,
+        update_count_per_block[0], update_vector_size, para.lambda_p,
+        para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
+        model->gpuGu, model->gpuHv, model->gpuGu_cnt, model->gpuHv_cnt, model->gpuGu_f, model->gpuHv_f);
+#else
     printf("RPCS_FAST\n");
     sgd_k128_kernel_hogwild_warp32_rpcs_fast<<<para.num_workers / 4, 128>>>(
         prob->gpuR, prob->gridSize[0], model->gpuHalfp, model->gpuHalfq,
@@ -241,7 +285,8 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob,
         para.num_iters, 0, max_update_count_per_block,
         update_count_per_block[0], update_vector_size, para.lambda_p,
         para.lambda_q, gpu_iter_err, prob->u_grid, prob->v_grid, 0, 0,
-        model->gpuGu, model->gpuHv, model->gpuGu_b, model->gpuHv_b);
+        model->gpuGu, model->gpuHv, model->gpuGu_cnt, model->gpuHv_cnt);
+#endif
 #else
     printf("RPCS\n");
     sgd_k128_kernel_hogwild_warp32_rpcs<<<para.num_workers / 4, 128>>>(

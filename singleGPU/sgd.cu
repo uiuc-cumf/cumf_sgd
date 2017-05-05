@@ -550,6 +550,13 @@ mf_model *init_model(mf_problem *prob, int k, float ave) {
   init_feature(model->halfp, model->ux, model->u_seg, k);
   init_feature(model->halfq, model->vy, model->v_seg, k);
 
+  // mom
+  cudaMallocHost(&model->vu, sizeof(float) * model->ux * model->u_seg * k);
+  cudaMallocHost(&model->vv, sizeof(float) * model->vy * model->v_seg * k);
+  gpuErr(cudaPeekAtLastError());
+  fill_n(model->vu, model->ux * model->u_seg * model->k, 1.0);
+  fill_n(model->vv, model->vy * model->v_seg * model->k, 1.0);    
+
   // rpcs
   cudaMallocHost(&model->gu, sizeof(float) * model->ux * model->u_seg);
   cudaMallocHost(&model->hv, sizeof(float) * model->vy * model->v_seg);
@@ -559,12 +566,20 @@ mf_model *init_model(mf_problem *prob, int k, float ave) {
   fill_n(model->hv, model->vy * model->v_seg, 1.0);
 
   // rpcs_fast
-  cudaMallocHost(&model->gu_b, sizeof(bool) * model->ux * model->u_seg);
-  cudaMallocHost(&model->hv_b, sizeof(bool) * model->vy * model->v_seg);
+  cudaMallocHost(&model->gu_cnt, sizeof(int) * model->ux * model->u_seg);
+  cudaMallocHost(&model->hv_cnt, sizeof(int) * model->vy * model->v_seg);
   gpuErr(cudaPeekAtLastError());
 
-  fill_n(model->gu_b, model->ux * model->u_seg, 0);
-  fill_n(model->hv_b, model->vy * model->v_seg, 0);
+  fill_n(model->gu_cnt, model->ux * model->u_seg, 0);
+  fill_n(model->hv_cnt, model->vy * model->v_seg, 0);
+
+  // rpcs_fast_tl
+  cudaMallocHost(&model->gu_f, sizeof(float) * model->ux * model->u_seg);
+  cudaMallocHost(&model->hv_f, sizeof(float) * model->vy * model->v_seg);
+  gpuErr(cudaPeekAtLastError());
+
+  fill_n(model->gu_f, model->ux * model->u_seg, 1.0);
+  fill_n(model->hv_f, model->vy * model->v_seg, 1.0);
 
   printf("time elapsed:%.8lfs\n", (clock() - start) / (double)CLOCKS_PER_SEC);
   printf("\n\n\n");

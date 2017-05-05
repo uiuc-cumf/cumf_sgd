@@ -45,7 +45,8 @@ struct Parameter
     bool do_nmf;
     bool quiet;
     bool copy_data;
-    Parameter():k(80), num_blocks(12), u_grid(1), v_grid(1), x_grid(1), y_grid(1), ux(1), vy(1), num_iters(30), gpu(3), lambda_p(0.05), lambda_q(0.05), lrate(0), alpha(0.01), beta(0.01){}
+    int totalgpus;
+    Parameter():totalgpus(1), k(80), num_blocks(12), u_grid(1), v_grid(1), x_grid(1), y_grid(1), ux(1), vy(1), num_iters(30), gpu(3), lambda_p(0.05), lambda_q(0.05), lrate(0), alpha(0.01), beta(0.01){}
 };
 
 struct Argument
@@ -58,6 +59,7 @@ struct Argument
 
     void print_arg()
     {
+    	printf("GPUS      :%d\n",  param.totalgpus);
     	printf("k         :%d\n",  param.k);
     	printf("num_blocks:%d\n",  param.num_blocks);
         printf("u_grid    :%d\n",  param.u_grid);

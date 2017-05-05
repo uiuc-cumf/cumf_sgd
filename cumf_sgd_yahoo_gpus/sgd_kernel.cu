@@ -18,10 +18,7 @@ extern __global__ void init_block_lock(bool*row, bool*col, int b);
 
 #include "sgd_k128_kernel_hogwild_warp32.h"
 
-
-#define GPUS 2
-#define Q_PER_CPU_KERNEL 4
-
+#define WARPS_PER_BLOCK 4
 
 
 __global__ void init_rand_state(curandState*state, int size)
@@ -132,12 +129,15 @@ __global__ void pre_transform_print(half *p, half *q)
 
 struct pthread_argument
 {
+	int totalEpochs;
 	int local_ite;
 	int iter;
 	mf_model*model;
 	int gpu_id;
 	int u_grid;
 	int v_grid;
+	int GPUS;
+	cudaStream_t stream_com, stream_mem_d2h, stream_mem_h2d;
 };
 
 
@@ -146,22 +146,38 @@ struct pthread_argument
 void *kernel_thread_generic(void *argument)
 {
 	pthread_argument *my_argument = (pthread_argument*)argument;
+	
+	
+	
+	
+	
+	
 
+	int GPUS = my_argument->GPUS;
 	int local_ite = my_argument->local_ite;
 	int iter = my_argument->iter;
 	mf_model*model = my_argument->model;
 
 	int gpu_id = my_argument->gpu_id;
-	const int qitems_per_kernel = Q_PER_CPU_KERNEL;
+	const int qitems_per_kernel = my_argument->v_grid / GPUS;
+	
+	
+	
 
 	//prepare device & stream.
 	cudaSetDevice(gpu_id);
-	cudaStream_t stream_com, stream_mem_d2h, stream_mem_h2d;
-	cudaStreamCreate(&stream_com);
-	cudaStreamCreate(&stream_mem_d2h);
-	cudaStreamCreate(&stream_mem_h2d);
-
-	//One strategy to distribute work
+	
+	cudaStream_t streams[qitems_per_kernel];
+	
+	for(int i = 0; i< qitems_per_kernel; i++)
+	{
+		cudaStreamCreate(&streams[i]);
+	}
+	
+	
+	
+	
+	
 	int p_index;
 	int q_index[qitems_per_kernel];
 	int iterationsToProcessFullQ = my_argument->v_grid / qitems_per_kernel;
@@ -169,44 +185,37 @@ void *kernel_thread_generic(void *argument)
 	p_index = (local_ite / iterationsToProcessFullQ)*GPUS + gpu_id;
 	//transfer p_index from cpu to GPU
 	
-	
-	if((local_ite % qitems_per_kernel) == 0)
-		cudaMemcpyAsync(model->gpuPtrs[gpu_id].gpu_p,
+	if((local_ite % iterationsToProcessFullQ) == 0)
+		cudaMemcpy(model->gpuPtrs[gpu_id].gpu_p,
 			model->halfp + p_index*model->u_seg*model->k,
 			sizeof(half)*model->u_seg*model->k,
-			cudaMemcpyHostToDevice,
-			stream_mem_h2d);
+			cudaMemcpyHostToDevice);
 
-	int base = ((local_ite ) % iterationsToProcessFullQ)  *  qitems_per_kernel;
+	int base = ((local_ite + gpu_id ) % iterationsToProcessFullQ)  *  qitems_per_kernel;
 	for (int i = 0; i < qitems_per_kernel; i++)
 	{
 		q_index[i] =  base + i;	
-	}
-
-	// Start with first q: q[0]
-	cudaMemcpyAsync(model->gpuPtrs[gpu_id].gpu_q[0],
-		model->halfq + q_index[0] * model->v_seg*model->k,
+		cudaMemcpyAsync(model->gpuPtrs[gpu_id].gpu_q[i],
+		model->halfq + q_index[i] * model->v_seg*model->k,
 		sizeof(half)*model->v_seg*model->k,
 		cudaMemcpyHostToDevice,
-		stream_mem_h2d
-	);
+		streams[i]);
+	}
 	
-	cudaDeviceSynchronize();
-	int s = 0;
-	for (; s < qitems_per_kernel; s++)
+	for (int i = 0; i < qitems_per_kernel; i++)
 	{
-		int grid_id = p_index * my_argument->u_grid + q_index[s];
-		sgd_k128_kernel_hogwild_warp32_lrate_128threads << <model->para.num_blocks/4, 32*4, 0, stream_com >> >(
+		int grid_id = p_index * my_argument->u_grid + q_index[i];
+		sgd_k128_kernel_hogwild_warp32_lrate_128threads << <model->para.num_blocks/WARPS_PER_BLOCK, 32*WARPS_PER_BLOCK, 0, streams[i] >> >(
 			model->gpuPtrs[gpu_id].R2D[grid_id],
 			model->gpuPtrs[gpu_id].gridSize[grid_id],
 			model->gpuPtrs[gpu_id].gpu_p,
-			model->gpuPtrs[gpu_id].gpu_q[s],
+			model->gpuPtrs[gpu_id].gpu_q[i],
 			model->gpuPtrs[gpu_id].rand_state,
 			model->gpuPtrs[gpu_id].gpu_dynamic_rate,
 			model->u_seg,
 			model->v_seg,
 			model->k,
-			1,
+			1, //* my_argument->totalEpochs,
 			iter,
 			model->max_update_count_per_block,
 			model->update_count_per_block[grid_id],
@@ -219,30 +228,27 @@ void *kernel_thread_generic(void *argument)
 			0,
 			0
 			);
-
-		if (s < qitems_per_kernel - 1) //if false: no more data to send
-			cudaMemcpyAsync(model->gpuPtrs[gpu_id].gpu_q[s + 1],
-				model->halfq + q_index[s+1] * model->v_seg*model->k,
-				sizeof(half)*model->v_seg*model->k,
-				cudaMemcpyHostToDevice,
-				stream_mem_h2d);
-
-		cudaDeviceSynchronize();
-
-		cudaMemcpyAsync(model->halfq + q_index[s] * model->v_seg*model->k,
-			model->gpuPtrs[gpu_id].gpu_q[s],
+	}
+	
+	for (int i = 0; i < qitems_per_kernel; i++)
+	{
+		cudaMemcpyAsync(model->halfq + q_index[i] * model->v_seg*model->k,
+			model->gpuPtrs[gpu_id].gpu_q[i],
 			sizeof(half)*model->v_seg*model->k,
 			cudaMemcpyDeviceToHost,
-			stream_mem_d2h);
+			streams[i]);
 	}
+	
+	//if(iter == 0)
+		//printf("----------------------GPU = %d, P= %d, Q = %d\n", gpu_id, p_index, base);
+
 
 	//transfer p_index back to cpu
-	if((local_ite % qitems_per_kernel) == qitems_per_kernel-1 )
-		cudaMemcpyAsync(model->halfp + p_index*model->u_seg*model->k,
+	if((local_ite % iterationsToProcessFullQ) == iterationsToProcessFullQ -1 )
+		cudaMemcpy(model->halfp + p_index*model->u_seg*model->k,
 			model->gpuPtrs[gpu_id].gpu_p,
 			sizeof(half)*model->u_seg*model->k,
-			cudaMemcpyDeviceToHost,
-			stream_mem_d2h);
+			cudaMemcpyDeviceToHost);
 
 	cudaDeviceSynchronize();
 }
@@ -391,11 +397,13 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob, float sc
 	else if (prob->x_grid*prob->y_grid == 1)
 	{
 		clock_t start = clock();
-
+		
 		const int Total_Grids = prob->u_grid * prob->v_grid;
-		const int Local_Iterations = (Total_Grids) / (GPUS * Q_PER_CPU_KERNEL);
-		pthread_t threads[GPUS];
+		const int Local_Iterations = prob->v_grid;
+	
 		model->para = para;
+		const int GPUS = para.totalgpus;
+		pthread_t threads[GPUS];
 		model->gpuPtrs = new mf_gpu[GPUS];
 		pthread_argument arg_list[GPUS];
 		
@@ -423,8 +431,8 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob, float sc
 
 
 			//prepare q a GPU
-			model->gpuPtrs[gpu_ite].gpu_q = new half*[Q_PER_CPU_KERNEL];
-			for (int i = 0; i < Q_PER_CPU_KERNEL; i++)
+			model->gpuPtrs[gpu_ite].gpu_q = new half*[prob->v_grid/GPUS];
+			for (int i = 0; i < prob->v_grid/GPUS; i++)
 				cudaMalloc(&(model->gpuPtrs[gpu_ite].gpu_q[i]), sizeof(half)*model->v_seg*model->k);
 
 			//prepare randstate
@@ -434,6 +442,15 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob, float sc
 			//learning rate
 			cudaMalloc(&(model->gpuPtrs[gpu_ite].gpu_dynamic_rate), sizeof(float) * 1024);
 			cudaMemcpy(model->gpuPtrs[gpu_ite].gpu_dynamic_rate, dynamic_rate, sizeof(float) * 1024, cudaMemcpyHostToDevice);
+			
+			cudaStreamCreate(&arg_list[gpu_ite].stream_com);
+			cudaStreamCreate(&arg_list[gpu_ite].stream_mem_d2h);
+			cudaStreamCreate(&arg_list[gpu_ite].stream_mem_h2d);
+			arg_list[gpu_ite].model = model;
+			arg_list[gpu_ite].u_grid = prob->u_grid;
+			arg_list[gpu_ite].v_grid = prob->v_grid;
+			arg_list[gpu_ite].GPUS = GPUS;
+			
 		}
 
 		model->max_update_count_per_block = max_update_count_per_block;
@@ -453,15 +470,14 @@ void sgd_update_k128(Parameter para, mf_model *model, mf_problem *prob, float sc
 				{
 					arg_list[gpu_ite].local_ite = local_ite;
 					arg_list[gpu_ite].iter = iter;
-					arg_list[gpu_ite].model = model;
-					arg_list[gpu_ite].u_grid = prob->u_grid;
-					arg_list[gpu_ite].v_grid = prob->v_grid;
+					arg_list[gpu_ite].totalEpochs = para.num_iters;
 					arg_list[gpu_ite].gpu_id = gpu_ite;
 					pthread_create(&(threads[gpu_ite]), NULL, kernel_thread_generic, (void*)&(arg_list[gpu_ite]));
-
-					pthread_join(threads[gpu_ite], NULL);
 				}
 				
+				for (int gpu_ite = 0; gpu_ite < GPUS; gpu_ite++)
+					pthread_join(threads[gpu_ite], NULL);
+					
 				
 				/* arg_list[0].local_ite = local_ite;
                     arg_list[0].iter = iter;

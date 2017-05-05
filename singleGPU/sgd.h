@@ -44,7 +44,7 @@ struct Parameter {
   Parameter()
       : k(80), num_workers(12), u_grid(1), v_grid(1), x_grid(1), y_grid(1),
         ux(1), vy(1), num_iters(30), gpu(3), lambda_p(0.05), lambda_q(0.05),
-        lrate(0), alpha(0.01), beta(0.01) {}
+        lrate(0.5), alpha(0.01), beta(0.01) {}
 };
 
 struct Argument {
@@ -132,17 +132,29 @@ struct mf_model {
   int cur_global_x_id[2];
   int cur_global_y_id[2];
 
+  // mom
+  float *vu;
+  float *vv;
+  float *gpuVu;
+  float *gpuVv;
+
   // rpcs
   float *gu;
   float *hv;
   float *gpuGu;
   float *gpuHv;
 
-  // rpcs_fast and rpcs_tl
-  bool *gu_b;
-  bool *hv_b;
-  bool *gpuGu_b;
-  bool *gpuHv_b;
+  // rpcs_fast
+  int *gu_cnt;
+  int *hv_cnt;
+  int *gpuGu_cnt;
+  int *gpuHv_cnt;
+
+  // rpcs_tl
+  float *gu_f;
+  float *hv_f;
+  float *gpuGu_f;
+  float *gpuHv_f; 
 };
 
 mf_problem read_problem(string path);

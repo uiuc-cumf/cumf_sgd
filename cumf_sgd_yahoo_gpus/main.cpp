@@ -43,7 +43,17 @@ Argument parse_argument(int argc, char **argv)
     int i;
     for(i = 1;i < argc; i++)
     {
-        if(args[i].compare("-g") == 0)
+    	if(args[i].compare("-gpus") == 0)
+    	{
+    		if((i + 1) >= argc)
+				throw invalid_argument("need to specify the number of GPUs\
+										after -gpus");
+			i++;
+			if(!is_numerical(argv[i]))
+				throw invalid_argument("-gpus should be followed by a number");
+			arg.param.totalgpus = atoi(argv[i]);
+    	}
+    	else if(args[i].compare("-g") == 0)
         {
             if((i + 1) >= argc)
                 throw invalid_argument("need to specify the id of GPUs\
